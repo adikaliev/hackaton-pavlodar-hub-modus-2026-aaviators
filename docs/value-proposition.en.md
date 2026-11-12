@@ -49,7 +49,7 @@ The main competitor isn't another product but the way things work now: emails, r
 
 A problem ("purchase requests are missing parameters") goes to the responsible person in the department with a short deadline. An idea goes to review with a longer one. Idea banks can't do the first, and helpdesks can't do the second.
 
-The owner is assigned by rules based on type, category and the author's department, and by a backup chain if that person is on holiday. Nobody distributes requests by hand. The demo rules reproduce the assignment for all 20 requests in the organizers' dataset.
+The owner is assigned by rules based on type, category and the author's department, and by a backup chain if that person is on holiday. Nobody distributes requests by hand. The demo rules reproduce the assignment for all 20 requests in the organizers' dataset; an automated test checks this.
 
 ### 3. The owner's "who's holding what" screen
 
@@ -83,9 +83,9 @@ Competitors assume employees will log into a portal on their own.
 ### 6. Built for Kazakhstan and for Bitrix24
 
 - Data is stored in Kazakhstan, as Law No. 94-V requires.
-- The interface is in Russian, with Kazakh as the next stage. Notifications go to Telegram, which staff already use.
-- It runs standalone or as a module inside Bitrix24. Integrations — login, employees, notifications, tasks — are switched on one by one and don't affect the core. Marketplace apps only live inside Bitrix24, and a configured smart process is tied to a Bitrix24 plan.
-- It complements Bitrix24 rather than replacing it. With the integration on, login, employees and notifications come from Bitrix24, and accepted decisions become Bitrix24 tasks.
+- The interface is in Russian, with Kazakh planned. Notifications go to Telegram, which staff already use.
+- It runs standalone, and later as a module inside Bitrix24 too. Integrations are switched on one by one and don't affect the core: in the MVP these are notifications (Telegram and a Bitrix24 simulator) and the employee directory; login and tasks through Bitrix24 are planned. Marketplace apps only live inside Bitrix24, and a configured smart process is tied to a Bitrix24 plan.
+- It complements Bitrix24 rather than replacing it. Once the integration is connected to the portal, login, employees and notifications will come from Bitrix24, and accepted decisions will become Bitrix24 tasks.
 - No per-seat fees for a foreign service, and no upgrade to the Professional plan.
 
 ### 7. A familiar logic
@@ -114,14 +114,16 @@ Legend: ✔ — yes; ◐ — partly, or needs configuration; — — no; ? — c
 | Automatic assignment by rules | — | ◐ | ? | ✔ | ✔ | ✔ |
 | Escalation of overdue items to the head and owner | — | ◐ | — | — | ◐ | ✔ |
 | Required reasons for every decision | — | ◐ | ✔ | ◐ | ◐ | ✔ |
-| Author confirms the result | — | ◐ | — | — | ◐ | ◐ next stage |
+| Author confirms the result | — | ◐ | — | — | ◐ | ✔ |
 | Owner's "who's holding what" screen | — | ◐ | — | ◐ | ◐ | ✔ |
 | Logging on someone's behalf | — | ◐ | — | ? | ✔ | ✔ |
 | Telegram notifications | — | — | — | — | — | ✔ |
 | Data stored in Kazakhstan | ◐ | ✔ | ? | — | — | ✔ |
 | Works with Bitrix24 | — | ✔ | ✔ | — | — | ◐ simulator in the MVP, connection in the next stage |
 | Works without Bitrix24 | — | — | — | ✔ | ✔ | ✔ |
-| "Done based on your suggestions" feed | — | — | — | ◐ | — | ◐ if time allows |
+| "Done based on your suggestions" feed | — | — | — | ◐ | — | ✔ |
+
+A note on our column: ✔ means the feature is implemented in the working MVP. The Telegram channel is built, covered by automated tests and checked with a real bot.
 
 ## Weak spots and answers to objections
 
