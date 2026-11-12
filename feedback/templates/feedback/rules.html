@@ -18,14 +18,14 @@
         <tbody>
           {% for r in rules %}
           <tr>
-            <td class="num">{{ r.order }}</td>
+            <td class="num" data-label="№">{{ r.order }}</td>
             <td><span class="title">{{ r.name }}</span><span class="small secondary">{{ r.conditions_text }}</span>{% if not r.is_active %} <span class="pill">выключено</span>{% endif %}</td>
-            <td>{{ r.target_label }}</td>
-            <td>{% if r.holder_now %}{{ r.holder_now.short_name }}
+            <td data-label="Кому">{{ r.target_label }}</td>
+            <td data-label="Сейчас это">{% if r.holder_now %}{{ r.holder_now.short_name }}
               {% if r.holder_now.absent %}<br><span class="pill">{{ r.holder_now.absence_note|default:"отсутствует" }}</span>
               <span class="small muted">→ {{ r.holder_now.deputy.short_name|default:"руководитель" }}</span>{% endif %}
               {% else %}<span class="muted small">по оргструктуре</span>{% endif %}</td>
-            <td class="right num">{{ r.fired }}</td>
+            <td class="right num" data-label="Сработало">{{ r.fired }}</td>
           </tr>
           {% endfor %}
         </tbody>

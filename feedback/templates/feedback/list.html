@@ -110,14 +110,14 @@
             {% if a.repeat_count %}<span class="pill" title="Голоса «у меня тоже» и объединённые дубликаты">повторов: {{ a.repeat_count }}</span>{% endif %}
           </td>
           {% if scope != 'my' %}
-          <td>{% if r.sees_author %}{{ a.author.short_name }}<br><span class="muted small">{{ a.author.department.name }}</span>{% else %}<span class="muted">скрыт</span>{% endif %}</td>
+          <td data-label="Автор">{% if r.sees_author %}{{ a.author.short_name }}<br><span class="muted small">{{ a.author.department.name }}</span>{% else %}<span class="muted">скрыт</span>{% endif %}</td>
           {% endif %}
-          <td>{% if a.assignee %}{{ a.assignee.short_name }}<br><span class="muted small">{{ a.assignee.department.name }}</span>{% else %}—{% endif %}</td>
-          <td>
+          <td data-label="Ответственный">{% if a.assignee %}{{ a.assignee.short_name }}<br><span class="muted small">{{ a.assignee.department.name }}</span>{% else %}—{% endif %}</td>
+          <td data-label="Статус">
             <span class="badge tone-{{ a.status|status_tone }}">{{ a.get_status_display }}</span>
             {% if scope == 'my' %}<div class="small secondary" style="margin-top:3px">{{ a.author_status_text }}</div>{% endif %}
           </td>
-          <td>
+          <td data-label="Срок">
             {% if d.label %}
             <span class="deadline tone-{{ d.tone }}"><span class="icon" aria-hidden="true">{{ d.icon }}</span><span>{{ d.label }}{% if d.where %}<span class="deadline-where">{{ d.where }}</span>{% endif %}</span></span>
             {% if d.kind and d.tone != 'wait' %}<div class="muted small">{{ d.kind }}</div>{% endif %}

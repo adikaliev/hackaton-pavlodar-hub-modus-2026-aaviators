@@ -7,6 +7,7 @@ All notable changes to this project are documented here, in [Keep a Changelog](h
 ## [Unreleased]
 
 ### Added
+- 2026-11-12: Phone screenshots (`docs/screenshots/11–13`) and a section about them in the README. Every page has been checked at 390 px wide.
 - 2026-11-12: Live checks: the Telegram bot (account linking with a one-time code, delivery of notifications) and the Docker image (it builds, and all 80 tests pass inside the container). The notes saying these were not verified are removed from the README and the design documents.
 - 2026-11-12: A working MVP on Django 5.2 and SQLite (`feedback/`, `config/`, `manage.py`): request submission with a receipt, routing by 16 rules with a backup chain, statuses and a thread with the author, deadlines in working days, automatic escalation, confirmation of the result by the author, search and filters, a leadership dashboard, the "Done" feed, confidential mode, registration on an employee's behalf, "me too" and merging of duplicates.
 - 2026-11-12: The core and pluggable integrations in code: an outgoing event log, a dispatcher with retries and a fallback channel, a Telegram bot (notifications and account linking), a Bitrix24 simulator (records the REST call `im.notify.system.add`, imports the directory from a file), an "Integrations" page with switches and a log.
@@ -26,6 +27,7 @@ All notable changes to this project are documented here, in [Keep a Changelog](h
 - 2026-11-11: Project scaffold. The organizers' files are moved from `init/` to `docs/source/` with ASCII names.
 
 ### Changed
+- 2026-11-12: Tables on a phone: each field in a card now has a label. Before, the author and the owner looked the same in the request list: a name and a department with no heading.
 - 2026-11-12: The solution design and the value proposition now match what is implemented: the "MVP" tag means "implemented in the working MVP"; confirmation of the result by the author, the "Done" feed, similar requests and "me too" moved into the MVP; what is not implemented (changing the category after submission, digests, drafts, translation files) moved to the next stage; escalation is described as a background check written to the history (`docs/solution-design.en.md`, `docs/value-proposition.en.md`).
 - 2026-11-12: The stack is chosen: Django 5.2 LTS, SQLite in the demo and PostgreSQL in production, pages rendered on the server (`docs/technical-concept.en.md`, section 5).
 - 2026-11-12: The organizers' originals (`docs/source/`) are excluded from git; their Markdown versions stay in the repository.

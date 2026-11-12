@@ -98,9 +98,9 @@
         <tr class="is-overdue">
           <td class="num"><a href="{% url 'appeal' a.number %}"><strong>{{ a.number }}</strong></a></td>
           <td><a class="title" href="{% url 'appeal' a.number %}">{{ a.title }}</a><span class="small secondary">{{ a.get_type_display }} · {{ a.category.name }}</span></td>
-          <td>{{ a.assignee.short_name }}<br><span class="muted small">{{ a.assignee.department.name }}</span></td>
-          <td><span class="deadline tone-critical"><span class="icon" aria-hidden="true">▲</span><span>{{ d.label }}</span></span><div class="muted small">{{ d.kind }}</div></td>
-          <td>{% if a.escalation_level >= 2 %}<strong>у руководства</strong>{% elif a.escalation_level == 1 %}у руководителя: {{ a.escalated_to.short_name|default:"—" }}{% else %}у ответственного{% endif %}</td>
+          <td data-label="Ответственный">{{ a.assignee.short_name }}<br><span class="muted small">{{ a.assignee.department.name }}</span></td>
+          <td data-label="Что просрочено"><span class="deadline tone-critical"><span class="icon" aria-hidden="true">▲</span><span>{{ d.label }}</span></span><div class="muted small">{{ d.kind }}</div></td>
+          <td data-label="Где сейчас">{% if a.escalation_level >= 2 %}<strong>у руководства</strong>{% elif a.escalation_level == 1 %}у руководителя: {{ a.escalated_to.short_name|default:"—" }}{% else %}у ответственного{% endif %}</td>
         </tr>
         {% endwith %}{% endfor %}
       </tbody>

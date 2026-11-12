@@ -59,13 +59,13 @@
       <tbody>
         {% for d in deliveries %}
         <tr>
-          <td class="nowrap small">{{ d.updated_at|dt }}</td>
-          <td>{{ d.integration.name }}</td>
-          <td>{{ d.event.recipient.short_name|default:"—" }}</td>
-          <td>{% if d.event.appeal %}<a href="{% url 'appeal' d.event.appeal.number %}">{{ d.event.appeal.number }}</a>{% endif %}</td>
-          <td><span class="badge {% if d.status == 'sent' %}tone-good{% elif d.status == 'simulated' %}mode-simulator{% elif d.status == 'failed' %}tone-wait{% else %}tone-muted{% endif %}">{{ d.get_status_display }}</span>
+          <td class="nowrap small" data-label="Когда">{{ d.updated_at|dt }}</td>
+          <td data-label="Канал">{{ d.integration.name }}</td>
+          <td data-label="Кому">{{ d.event.recipient.short_name|default:"—" }}</td>
+          <td data-label="Обращение">{% if d.event.appeal %}<a href="{% url 'appeal' d.event.appeal.number %}">{{ d.event.appeal.number }}</a>{% endif %}</td>
+          <td data-label="Результат"><span class="badge {% if d.status == 'sent' %}tone-good{% elif d.status == 'simulated' %}mode-simulator{% elif d.status == 'failed' %}tone-wait{% else %}tone-muted{% endif %}">{{ d.get_status_display }}</span>
             {% if d.error %}<div class="small muted">{{ d.error }}</div>{% endif %}</td>
-          <td style="min-width:280px"><details><summary class="small"><code>{{ d.request.method }}</code></summary><pre class="code">{{ d.request|pretty_json }}</pre></details></td>
+          <td class="code-cell"><details><summary class="small"><code>{{ d.request.method }}</code></summary><pre class="code">{{ d.request|pretty_json }}</pre></details></td>
         </tr>
         {% endfor %}
       </tbody>

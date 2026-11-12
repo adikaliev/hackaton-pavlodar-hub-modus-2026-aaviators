@@ -171,7 +171,7 @@ flowchart TD
 | Integrations | everyone read-only; the administrator switches | each integration's mode and the request log |
 | Admin panel | the administrator | categories, deadlines, rules, roles, employees, calendar, thresholds |
 
-The pages are built for phones: the submission form and the request page work on a narrow screen.
+The pages are built for phones, with one stylesheet and no separate mobile version. Grids fall back to one column on their own, the menu scrolls sideways, and below 640 px tables turn into cards with field labels. Every page has been checked at 390 px wide, with no horizontal scrolling. Screenshots are in [screenshots/](screenshots/), files 11–13.
 
 ## 5. Technologies and why
 

@@ -56,6 +56,12 @@ The six demo scenarios from the organizers' dataset ([docs/dataset.md](docs/data
 |---|---|
 | ![Escalation in a request's history](docs/screenshots/03-request-escalated.png) | ![Rules and the "who will get it" check](docs/screenshots/07-rules.png) |
 
+**On a phone.** There is no separate app: the same pages rearrange for a narrow screen, and tables turn into cards with field labels. Every page has been checked at 390 px wide.
+
+| Submitting a request | A request with escalation | My requests |
+|---|---|---|
+| ![The submission form on a phone](docs/screenshots/11-mobile-form.png) | ![A request with escalation on a phone](docs/screenshots/12-mobile-request.png) | ![The author's request list on a phone](docs/screenshots/13-mobile-my-requests.png) |
+
 The other screens are in [docs/screenshots/](docs/screenshots/).
 
 ## What is implemented, what is simulated, what is planned
