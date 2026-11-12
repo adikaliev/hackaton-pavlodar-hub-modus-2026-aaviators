@@ -14,6 +14,7 @@ from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_POST
 
 from .integrations import bitrix24, telegram
@@ -750,14 +751,23 @@ def profile(request):
             messages.success(request, "Telegram отвязан.")
         return redirect("profile")
     telegram_on = Integration.objects.filter(code="telegram", enabled=True).exists()
+    telegram_url = telegram.link_url(employee) if telegram.configured() and not employee.telegram_chat_id else ""
     return render(request, "feedback/profile.html", {
         "channels": Employee.Channel.choices,
         "telegram_on": telegram_on,
         "telegram_configured": telegram.configured(),
-        "telegram_url": telegram.link_url(employee) if telegram.configured() and not employee.telegram_chat_id else "",
+        "telegram_url": telegram_url,
+        # segno builds the SVG itself from the link; no user input reaches it unescaped.
+        "telegram_qr": mark_safe(telegram.link_qr_svg(telegram_url)) if telegram_url and telegram_on else "",
         "roles": employee.functional_roles.all(),
         "manager": employee.manager(),
     })
+
+
+@persona_required
+def telegram_status(request):
+    """Polled by the profile page while it shows the link, so a computer screen notices when the phone links."""
+    return JsonResponse({"linked": bool(request.employee.telegram_chat_id)})
 
 
 @persona_required

@@ -37,8 +37,14 @@
   <p>Аккаунт привязан. Уведомления приходят в Telegram.</p>
   <form method="post">{% csrf_token %}<input type="hidden" name="action" value="unlink"><button class="btn danger">Отвязать</button></form>
   {% elif telegram_url and telegram_on %}
-  <p>Откройте ссылку на телефоне и нажмите «Start» — бот привяжет ваш аккаунт. Ссылка одноразовая.</p>
-  <a class="btn primary" href="{{ telegram_url }}" target="_blank" rel="noopener">Привязать Telegram</a>
+  <div class="tg-link" data-telegram-wait="{% url 'telegram_status' %}">
+    <div class="grow">
+      <p>Нажмите кнопку — откроется бот. Нажмите в нём «Start», и аккаунт привяжется.<span class="tg-qr-hint"> Если страница открыта на компьютере, отсканируйте QR-код камерой телефона.</span></p>
+      <a class="btn primary" href="{{ telegram_url }}" target="_blank" rel="noopener">Привязать Telegram</a>
+      <p class="small muted" style="margin:10px 0 0">Ссылка и QR-код одноразовые. Когда бот подтвердит привязку, страница обновится сама.</p>
+    </div>
+    {% if telegram_qr %}<div class="tg-qr">{{ telegram_qr }}</div>{% endif %}
+  </div>
   {% elif telegram_configured %}
   <p class="muted" style="margin:0">Бот настроен, но интеграция сейчас выключена или не задано имя бота (<code>TELEGRAM_BOT_USERNAME</code>). Включить её может администратор на странице «Интеграции».</p>
   {% else %}

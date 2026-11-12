@@ -132,6 +132,30 @@ class TelegramTests(CoreTestCase):
         again = telegram.handle_update({"update_id": 2, "message": {"chat": {"id": 888}, "text": f"/start {code}"}})
         self.assertIn("не найден", again)
 
+    def test_profile_offers_the_link_as_a_button_and_a_qr_code(self):
+        self.login(17)
+        page = self.client.get("/profile/").content.decode()
+        code = self.person(17).telegram_link_code
+        self.assertIn(f'href="https://t.me/feedback_bot?start={code}"', page)
+        self.assertIn('class="qr"', page)  # drawn on our server: the code never goes to an online QR service
+        self.assertIn("<title>QR-код для привязки Telegram</title>", page)
+
+    def test_profile_notices_when_the_phone_has_linked(self):
+        self.login(17)
+        self.client.get("/profile/")
+        self.assertEqual(self.client.get("/profile/telegram/").json(), {"linked": False})
+        code = self.person(17).telegram_link_code
+        telegram.handle_update({"update_id": 1, "message": {"chat": {"id": 777}, "text": f"/start {code}"}})
+        self.assertEqual(self.client.get("/profile/telegram/").json(), {"linked": True})
+        page = self.client.get("/profile/").content.decode()
+        self.assertIn("Аккаунт привязан", page)
+        self.assertNotIn('class="qr"', page)
+
+    def test_no_qr_code_while_the_integration_is_off(self):
+        switch("telegram", on=False)
+        self.login(17)
+        self.assertNotIn('class="qr"', self.client.get("/profile/").content.decode())
+
     def test_bot_does_not_accept_request_text_in_chat(self):
         reply = telegram.handle_update({"update_id": 3, "message": {"chat": {"id": 999}, "text": "У нас проблема с 1С"}})
         self.assertIn("только присылает уведомления", reply)

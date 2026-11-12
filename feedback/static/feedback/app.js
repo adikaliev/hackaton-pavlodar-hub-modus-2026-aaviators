@@ -27,6 +27,21 @@
   document.addEventListener("change", syncToggles);
   syncToggles();
 
+  // Profile: while the Telegram link is on screen, check every few seconds whether the phone has linked,
+  // so a QR code scanned from a computer screen turns into "linked" without a manual reload.
+  var telegramWait = document.querySelector("[data-telegram-wait]");
+  if (telegramWait) {
+    var checks = 0;
+    var poll = window.setInterval(function () {
+      if (document.hidden) return;
+      if (++checks > 200) { window.clearInterval(poll); return; }  // stop after about ten minutes
+      fetch(telegramWait.dataset.telegramWait, { credentials: "same-origin" })
+        .then(function (response) { return response.ok ? response.json() : null; })
+        .then(function (data) { if (data && data.linked) window.location.reload(); })
+        .catch(function () { /* the button and a manual reload still work */ });
+    }, 3000);
+  }
+
   // Submission form: suggest a category and show similar requests while the author types.
   var text = document.getElementById("appeal-text");
   var hints = document.getElementById("hints");

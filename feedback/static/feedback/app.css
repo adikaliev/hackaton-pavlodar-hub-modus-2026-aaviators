@@ -97,6 +97,13 @@ small, .small { font-size: 13px; }
 .split { display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr) 340px; align-items: start; }
 @media (max-width: 900px) { .split { grid-template-columns: 1fr; } }
 
+/* Profile: Telegram link as a button and a QR code (the QR is for linking from a computer). */
+.tg-link { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
+.tg-link > .grow { flex: 1 1 280px; }
+.tg-qr { flex: none; }
+.tg-qr svg { display: block; border: 1px solid var(--border); border-radius: 8px; }
+@media (max-width: 640px) { .tg-qr, .tg-qr-hint { display: none; } }
+
 .flash { border-radius: var(--radius); padding: 10px 14px; margin-bottom: 14px; border: 1px solid var(--border); background: var(--surface); }
 .flash.success { background: var(--good-wash); border-color: #bfe3bf; }
 .flash.error { background: var(--critical-wash); border-color: #f0c2c2; }

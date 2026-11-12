@@ -22,5 +22,6 @@ urlpatterns = [
     path("rules/", views.rules, name="rules"),
     path("integrations/", views.integrations, name="integrations"),
     path("profile/", views.profile, name="profile"),
+    path("profile/telegram/", views.telegram_status, name="telegram_status"),
     path("settings/", views.open_admin, name="open_admin"),
 ]

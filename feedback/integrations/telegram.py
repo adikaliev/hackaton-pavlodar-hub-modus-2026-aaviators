@@ -3,7 +3,8 @@
 * Notifications carry the request number, the status and a link. No request
   text and no names (Telegram's servers are outside Kazakhstan).
 * An employee links their account with a one-time code: the profile page shows
-  `t.me/<bot>?start=<code>`, and the bot ties the chat to the employee record.
+  `t.me/<bot>?start=<code>` as a button and as a QR code, and the bot ties the
+  chat to the employee record.
   An unlinked chat gets nothing and can do nothing.
 
 The bot token comes from the environment (`TELEGRAM_BOT_TOKEN`) and is never
@@ -17,6 +18,7 @@ import urllib.error
 import urllib.request
 from urllib.parse import urlparse
 
+import segno
 from django.conf import settings
 
 from ..models import Delivery, Employee, Integration
@@ -97,6 +99,18 @@ def link_url(employee: Employee) -> str:
     if not settings.TELEGRAM_BOT_USERNAME:
         return ""
     return f"https://t.me/{settings.TELEGRAM_BOT_USERNAME}?start={link_code(employee)}"
+
+
+def link_qr_svg(url: str) -> str:
+    """The same one-time link as a QR code, for linking from a computer: scan it with the phone's camera.
+
+    Drawn on our server as inline SVG, so the code never goes to an online QR service.
+    """
+    if not url:
+        return ""
+    qr = segno.make(url, error="m")
+    return qr.svg_inline(scale=5, border=3, dark="#1f1f1c", light="#ffffff", svgclass="qr",
+                         title="QR-код для привязки Telegram")
 
 
 def handle_update(update: dict) -> str | None:
