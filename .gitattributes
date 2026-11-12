@@ -1,0 +1,18 @@
+# Store text with LF line endings so the repo behaves the same on Windows, Linux and macOS.
+* text=auto eol=lf
+
+# Windows scripts keep CRLF.
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary files: never touch line endings, don't try to diff.
+*.docx binary
+*.xlsx binary
+*.pdf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.mp4 binary
+*.ico binary

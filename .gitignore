@@ -1,0 +1,57 @@
+# --- Secrets -----------------------------------------------------------------
+# Real values live only in .env (Telegram bot token, etc.). .env.example is committed.
+.env
+.env.*
+!.env.example
+
+# --- Source material we don't publish ----------------------------------------
+# Organizers' originals: the spec and dataset (.docx), the sponsor video (shows a real person),
+# and Telegram posts (private chat invite and form links). The Markdown versions in docs/ are committed.
+docs/source/
+
+# --- Team-internal material (kept on disk, synced by OneDrive, not published) --
+# Working notes: task analysis, spec coverage check, video transcript, research.
+docs/internal/
+# Instructions for coding agents.
+AGENTS.md
+CLAUDE.md
+.claude/
+
+# --- Runtime data ------------------------------------------------------------
+# The demo database is rebuilt from data/ (seed files), never committed.
+*.sqlite
+*.sqlite3
+*.db
+# Uploaded attachments and logs.
+uploads/
+storage/
+logs/
+*.log
+
+# --- Python ------------------------------------------------------------------
+# Virtual environments live outside the project (C:\envs\<project>), these are a safety net.
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# --- Node --------------------------------------------------------------------
+node_modules/
+dist/
+build/
+.next/
+coverage/
+
+# --- Editors, OS, sync -------------------------------------------------------
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+# Word/Excel lock files created next to an open document.
+~$*
