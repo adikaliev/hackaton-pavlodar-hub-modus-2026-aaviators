@@ -1,0 +1,139 @@
+{% extends "feedback/base.html" %}
+{% load fb %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="page-head row between">
+  <div>
+    <h1>{{ title }}</h1>
+    <p>{{ lead }}</p>
+  </div>
+  {% if scope == 'my' %}<a class="btn primary" href="{% url 'new' %}">＋ Подать обращение</a>{% endif %}
+</div>
+
+{% if needs_me %}
+<div class="card receipt" style="margin-bottom:14px">
+  <strong>Нужно ваше действие</strong>
+  {% for r in needs_me %}
+  <div class="row between" style="margin-top:6px">
+    <span><a href="{% url 'appeal' r.appeal.number %}"><strong>{{ r.appeal.number }}</strong></a> · {{ r.appeal.author_status_text }}</span>
+    <a class="btn small" href="{% url 'appeal' r.appeal.number %}">Открыть</a>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if tabs %}
+<div class="tabs">
+  {% for code, label, count in tabs %}
+  <a href="?tab={{ code }}" class="{% if tab == code %}on{% endif %}">{{ label }} <span class="count {% if code == 'escalated' and count %}alert{% endif %}">{{ count }}</span></a>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if options %}
+<form method="get" class="card flat" style="margin-bottom:14px">
+  {% if tab %}<input type="hidden" name="tab" value="{{ tab }}">{% endif %}
+  <div class="filters">
+    <div class="wide"><label for="q" class="small">Поиск</label><input id="q" type="search" name="q" value="{{ request.GET.q }}" placeholder="Текст, номер, решение, результат"></div>
+    <div><label for="f-dept" class="small">Подразделение ответственного</label>
+      <select id="f-dept" name="dept"><option value="">Любое</option>
+        {% for d in options.departments %}<option value="{{ d.pk }}" {% if request.GET.dept == d.pk|stringformat:"s" %}selected{% endif %}>{{ d.name }}</option>{% endfor %}
+      </select></div>
+    <div><label for="f-adept" class="small">Подразделение автора</label>
+      <select id="f-adept" name="author_dept"><option value="">Любое</option>
+        {% for d in options.departments %}<option value="{{ d.pk }}" {% if request.GET.author_dept == d.pk|stringformat:"s" %}selected{% endif %}>{{ d.name }}</option>{% endfor %}
+      </select></div>
+    <div><label for="f-cat" class="small">Категория</label>
+      <select id="f-cat" name="category"><option value="">Любая</option>
+        {% for g in options.groups %}<optgroup label="{{ g.name }}">
+          {% for c in g.categories.all %}<option value="{{ c.pk }}" {% if request.GET.category == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+        </optgroup>{% endfor %}
+      </select></div>
+    <div><label for="f-status" class="small">Статус</label>
+      <select id="f-status" name="status"><option value="">Любой</option>
+        <option value="open" {% if request.GET.status == 'open' %}selected{% endif %}>Все открытые</option>
+        {% for value, label in options.statuses %}<option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+      </select></div>
+    <div><label for="f-type" class="small">Тип</label>
+      <select id="f-type" name="type"><option value="">Любой</option>
+        {% for value, label in options.types %}<option value="{{ value }}" {% if request.GET.type == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+      </select></div>
+    <div><label for="f-deadline" class="small">Срок</label>
+      <select id="f-deadline" name="deadline"><option value="">Любой</option>
+        <option value="overdue" {% if request.GET.deadline == 'overdue' %}selected{% endif %}>Просрочено</option>
+        <option value="escalated" {% if request.GET.deadline == 'escalated' %}selected{% endif %}>Просрочено и эскалировано</option>
+        <option value="today" {% if request.GET.deadline == 'today' %}selected{% endif %}>Срок сегодня или завтра</option>
+        <option value="paused" {% if request.GET.deadline == 'paused' %}selected{% endif %}>На паузе: ждём автора</option>
+      </select></div>
+    <div><label for="f-sort" class="small">Порядок</label>
+      <select id="f-sort" name="sort">
+        <option value="">Сначала горящие сроки</option>
+        <option value="new" {% if request.GET.sort == 'new' %}selected{% endif %}>Сначала новые</option>
+      </select></div>
+    <div class="row"><button class="btn primary">Показать</button>{% if active %}<a class="btn" href="?{% if tab %}tab={{ tab }}{% endif %}">Сбросить</a>{% endif %}</div>
+  </div>
+  {% if show_quick %}
+  <div class="quick">
+    <a href="?" class="{% if not active %}on{% endif %}">Все</a>
+    <a href="?status=open" class="{% if request.GET.status == 'open' and not request.GET.deadline %}on{% endif %}">Открытые</a>
+    <a href="?deadline=overdue" class="{% if request.GET.deadline == 'overdue' %}on{% endif %}">▲ Просроченные</a>
+    <a href="?deadline=escalated" class="{% if request.GET.deadline == 'escalated' %}on{% endif %}">Эскалированные</a>
+    <a href="?deadline=today" class="{% if request.GET.deadline == 'today' %}on{% endif %}">● Срок сегодня или завтра</a>
+    <a href="?deadline=paused" class="{% if request.GET.deadline == 'paused' %}on{% endif %}">⏸ Ждём автора</a>
+  </div>
+  {% endif %}
+</form>
+{% endif %}
+
+<div class="card">
+  {% if rows %}
+  <div class="small muted" style="margin-bottom:6px">Найдено: {{ rows|length }}</div>
+  <div class="table-wrap">
+    <table class="table responsive">
+      <thead>
+        <tr>
+          <th>№</th><th>Обращение</th>
+          {% if scope != 'my' %}<th>Автор</th>{% endif %}
+          <th>Ответственный</th><th>Статус</th><th>Срок</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}{% with a=r.appeal d=r.deadline %}
+        <tr class="{% if d.tone == 'critical' %}is-overdue{% endif %}">
+          <td class="num"><a href="{% url 'appeal' a.number %}"><strong>{{ a.number }}</strong></a><br><span class="muted small">{{ a.created_at|day }}</span></td>
+          <td>
+            <a class="title" href="{% url 'appeal' a.number %}">{{ a.title }}</a>
+            <span class="small secondary">{{ a.get_type_display }} · {{ a.category.name }}</span>
+            {% if a.priority == 'high' %}<span class="pill high">срочно</span>{% endif %}
+            {% if a.is_confidential %}<span class="pill lock">конфиденциально</span>{% endif %}
+            {% if a.registered_by_id %}<span class="pill">со слов сотрудника</span>{% endif %}
+            {% if a.repeat_count %}<span class="pill" title="Голоса «у меня тоже» и объединённые дубликаты">повторов: {{ a.repeat_count }}</span>{% endif %}
+          </td>
+          {% if scope != 'my' %}
+          <td>{% if r.sees_author %}{{ a.author.short_name }}<br><span class="muted small">{{ a.author.department.name }}</span>{% else %}<span class="muted">скрыт</span>{% endif %}</td>
+          {% endif %}
+          <td>{% if a.assignee %}{{ a.assignee.short_name }}<br><span class="muted small">{{ a.assignee.department.name }}</span>{% else %}—{% endif %}</td>
+          <td>
+            <span class="badge tone-{{ a.status|status_tone }}">{{ a.get_status_display }}</span>
+            {% if scope == 'my' %}<div class="small secondary" style="margin-top:3px">{{ a.author_status_text }}</div>{% endif %}
+          </td>
+          <td>
+            {% if d.label %}
+            <span class="deadline tone-{{ d.tone }}"><span class="icon" aria-hidden="true">{{ d.icon }}</span><span>{{ d.label }}{% if d.where %}<span class="deadline-where">{{ d.where }}</span>{% endif %}</span></span>
+            {% if d.kind and d.tone != 'wait' %}<div class="muted small">{{ d.kind }}</div>{% endif %}
+            {% else %}<span class="muted">—</span>{% endif %}
+          </td>
+        </tr>
+        {% endwith %}{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty">
+    {% if scope == 'my' %}У вас пока нет обращений. <a href="{% url 'new' %}">Подать первое</a> — это занимает меньше минуты.
+    {% elif active %}По этим условиям ничего не найдено. Попробуйте убрать часть фильтров.
+    {% else %}Здесь пусто: обращений в этой очереди нет.{% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

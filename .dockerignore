@@ -1,0 +1,14 @@
+.git
+.env
+.env.*
+!.env.example
+storage/
+docs/source/
+docs/internal/
+.claude/
+AGENTS.md
+CLAUDE.md
+__pycache__/
+*.pyc
+.venv/
+venv/

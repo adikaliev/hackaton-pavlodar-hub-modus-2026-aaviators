@@ -1,0 +1,48 @@
+{% extends "feedback/base.html" %}
+{% load fb %}
+{% block title %}Сделано по вашим предложениям{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Сделано по вашим предложениям</h1>
+  <p>Что изменилось в компании после обращений сотрудников. Сюда попадают только обращения, которые автор разрешил показывать коллегам.</p>
+</div>
+
+<div class="split">
+  <div class="card">
+    {% for a in done %}
+    <div class="feed-item">
+      <div class="row between">
+        <span class="badge tone-good">{% if a.status == 'closed' %}Сделано, автор подтвердил{% else %}Сделано{% endif %}</span>
+        <span class="muted small">{{ a.implemented_at|day }}</span>
+      </div>
+      <h3 style="margin:8px 0 4px"><a href="{% url 'appeal' a.number %}">{{ a.title }}</a></h3>
+      <p class="secondary" style="margin-bottom:6px">{{ a.result }}</p>
+      <div class="small muted">Предложил(а): {{ a.author.full_name }}{% if a.author.department %}, {{ a.author.department.name|lower }}{% endif %}
+        · {{ a.category.name }}{% if a.votes %} · поддержали: {{ a.votes }}{% endif %}</div>
+    </div>
+    {% empty %}
+    <div class="empty">Здесь появятся реализованные предложения.</div>
+    {% endfor %}
+  </div>
+
+  <aside class="card">
+    <h2>Сейчас в работе</h2>
+    <p class="small muted">Открытые обращения коллег. Если у вас та же проблема, нажмите «У меня тоже» — новое обращение подавать не нужно.</p>
+    {% for a in open_public %}
+    <div class="feed-item">
+      <a href="{% url 'appeal' a.number %}"><strong>{{ a.title }}</strong></a>
+      <div class="row between" style="margin-top:4px">
+        <span class="small muted">{{ a.number }} · {{ a.get_status_display|lower }}{% if a.votes %} · поддержали: {{ a.votes }}{% endif %}</span>
+        {% if a.author_id == me.pk %}<span class="pill">ваше</span>
+        {% elif a.pk in supported %}<span class="pill">вы поддержали</span>
+        {% elif a.assignee_id != me.pk %}
+        <form method="post" action="{% url 'action' a.number 'support' %}">{% csrf_token %}<input type="hidden" name="next" value="{% url 'done' %}"><button class="btn small">У меня тоже</button></form>
+        {% endif %}
+      </div>
+    </div>
+    {% empty %}
+    <div class="empty">Открытых обращений нет.</div>
+    {% endfor %}
+  </aside>
+</div>
+{% endblock %}

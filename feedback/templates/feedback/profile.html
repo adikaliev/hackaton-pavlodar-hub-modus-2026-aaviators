@@ -1,0 +1,48 @@
+{% extends "feedback/base.html" %}
+{% block title %}Профиль{% endblock %}
+{% block container_class %}narrow{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>{{ me.full_name }}</h1>
+  <p>{{ me.position }}{% if me.department %} · {{ me.department.name }}{% endif %}</p>
+</div>
+
+<div class="card">
+  <h2>Роль в системе</h2>
+  <dl class="facts">
+    <dt>Уровень доступа</dt><dd>{{ me.role_label }}</dd>
+    {% if roles %}<dt>Отвечает за</dt><dd>{% for r in roles %}{{ r.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</dd>{% endif %}
+    <dt>Руководитель</dt><dd>{{ manager.full_name|default:"—" }}</dd>
+    <dt>Заместитель</dt><dd>{{ me.deputy.full_name|default:"не назначен" }}</dd>
+    <dt>Статус</dt><dd>{% if me.absent %}{{ me.absence_note|default:"отсутствует" }} — новые обращения получает заместитель{% else %}на месте{% endif %}</dd>
+  </dl>
+  <p class="small muted" style="margin:10px 0 0">Данные приходят из справочника сотрудников. В демо он загружен из файла в формате Битрикс24.</p>
+</div>
+
+<div class="card">
+  <h2>Куда присылать уведомления</h2>
+  <form method="post" class="row">{% csrf_token %}
+    <input type="hidden" name="action" value="channel">
+    <select name="channel" style="max-width:340px" aria-label="Канал уведомлений">
+      {% for value, label in channels %}<option value="{{ value }}" {% if me.notify_channel == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    <button class="btn">Сохранить</button>
+  </form>
+  <p class="small muted" style="margin:10px 0 0">В системе уведомления видны всегда. Во внешние каналы уходят только номер обращения, статус и ссылка — без текста и имён.</p>
+</div>
+
+<div class="card">
+  <h2>Telegram</h2>
+  {% if me.telegram_chat_id %}
+  <p>Аккаунт привязан. Уведомления приходят в Telegram.</p>
+  <form method="post">{% csrf_token %}<input type="hidden" name="action" value="unlink"><button class="btn danger">Отвязать</button></form>
+  {% elif telegram_url and telegram_on %}
+  <p>Откройте ссылку на телефоне и нажмите «Start» — бот привяжет ваш аккаунт. Ссылка одноразовая.</p>
+  <a class="btn primary" href="{{ telegram_url }}" target="_blank" rel="noopener">Привязать Telegram</a>
+  {% elif telegram_configured %}
+  <p class="muted" style="margin:0">Бот настроен, но интеграция сейчас выключена или не задано имя бота (<code>TELEGRAM_BOT_USERNAME</code>). Включить её может администратор на странице «Интеграции».</p>
+  {% else %}
+  <p class="muted" style="margin:0">Бот не подключён в этой установке: не задан токен. Уведомления приходят в систему и в журнал имитации Битрикс24.</p>
+  {% endif %}
+</div>
+{% endblock %}

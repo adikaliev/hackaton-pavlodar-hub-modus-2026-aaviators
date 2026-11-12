@@ -1,0 +1,20 @@
+{% extends "feedback/base.html" %}
+{% load fb %}
+{% block title %}Уведомления{% endblock %}
+{% block container_class %}narrow{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Уведомления</h1>
+  <p>Уведомления в системе работают всегда, даже если все внешние каналы выключены. Канал для копий настраивается в <a href="{% url 'profile' %}">профиле</a>.</p>
+</div>
+<div class="card">
+  {% for n in items %}
+  <div class="notice {% if n.pk in unread %}unread{% endif %}">
+    <span class="muted small nowrap">{{ n.created_at|dt }}</span>
+    <span class="grow">{% if n.appeal %}<a href="{% url 'appeal' n.appeal.number %}">{{ n.text }}</a>{% else %}{{ n.text }}{% endif %}</span>
+  </div>
+  {% empty %}
+  <div class="empty">Уведомлений пока нет. Они появятся, когда по вашим обращениям что-то изменится.</div>
+  {% endfor %}
+</div>
+{% endblock %}

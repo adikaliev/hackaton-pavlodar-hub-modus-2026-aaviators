@@ -1,0 +1,78 @@
+{% extends "feedback/base.html" %}
+{% load fb %}
+{% block title %}Интеграции{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Интеграции</h1>
+  <p>Ядро работает без единой интеграции: оно только записывает события в журнал исходящих событий, а включённые интеграции забирают их оттуда.
+    Выключите любую — обращения, сроки и уведомления в системе продолжат работать.</p>
+</div>
+
+<div class="kpis" style="margin-bottom:14px">
+  <div class="kpi"><div class="label">Уведомлений в системе</div><div class="value">{{ inapp_total }}</div><div class="note">ядро, не отключается</div></div>
+  <div class="kpi"><div class="label">Событий в журнале</div><div class="value">{{ outbox_total }}</div><div class="note">ждут обработки: {{ outbox_pending }}</div></div>
+  <div class="kpi"><div class="label">Имитация Битрикс24</div><div class="value">{{ delivery_counts.simulated|default:0 }}</div><div class="note">записано REST-запросов</div></div>
+  <div class="kpi"><div class="label">Отправлено в Telegram</div><div class="value">{{ delivery_counts.sent|default:0 }}</div><div class="note">привязано аккаунтов: {{ telegram_linked }} · ошибок: {{ delivery_counts.failed|default:0 }}</div></div>
+</div>
+
+<div class="cols">
+  {% for i in integrations %}
+  <div class="card">
+    <div class="row between">
+      <span class="badge mode-{{ i.mode }}">{{ i.get_mode_display }}</span>
+      {% if i.mode != 'planned' %}
+      {% if me.is_admin %}
+      <form method="post">{% csrf_token %}<input type="hidden" name="code" value="{{ i.code }}">
+        <button class="switch {% if i.enabled %}on{% endif %}" name="action" value="toggle" title="Включить или выключить"><span class="knob"></span>{% if i.enabled %}Включена{% else %}Выключена{% endif %}</button>
+      </form>
+      {% else %}
+      <span class="switch {% if i.enabled %}on{% endif %}" title="Переключает администратор"><span class="knob"></span>{% if i.enabled %}Включена{% else %}Выключена{% endif %}</span>
+      {% endif %}
+      {% endif %}
+    </div>
+    <h3 style="margin-top:10px">{{ i.name }}</h3>
+    <p class="small secondary">{{ i.description }}</p>
+    <p class="small muted" style="margin-bottom:4px"><strong>Если выключена:</strong> {{ i.when_off }}</p>
+    {% if i.code == 'telegram' %}
+    <p class="small {% if not telegram_configured %}muted{% endif %}" style="margin:6px 0 0">
+      {% if telegram_configured %}Токен бота задан в окружении. Привязано аккаунтов: {{ telegram_linked }}.
+      {% else %}Токен бота не задан: добавьте <code>TELEGRAM_BOT_TOKEN</code> и <code>TELEGRAM_BOT_USERNAME</code> в <code>.env</code>. До этого уведомления идут в следующий канал.{% endif %}</p>
+    {% endif %}
+    {% if i.code == 'bitrix24_directory' and me.is_admin %}
+    <form method="post" style="margin-top:8px">{% csrf_token %}<input type="hidden" name="code" value="{{ i.code }}">
+      <button class="btn small" name="action" value="import">Загрузить справочник из файла заново</button>
+    </form>
+    {% endif %}
+    {% if i.last_ok_at %}<p class="small muted" style="margin:6px 0 0">Последняя успешная операция: {{ i.last_ok_at|dt }}</p>{% endif %}
+    {% if i.last_error %}<p class="small" style="margin:6px 0 0"><span class="deadline tone-critical"><span class="icon">▲</span>Последняя ошибка: {{ i.last_error }}</span></p>{% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+<div class="card" style="margin-top:14px">
+  <h2>Журнал интеграций</h2>
+  <p class="small muted">Последние доставки. Для Битрикс24 показан запрос, который ушёл бы на портал. Наружу уходят только номер обращения, статус и ссылка.</p>
+  {% if deliveries %}
+  <div class="table-wrap">
+    <table class="table responsive">
+      <thead><tr><th>Когда</th><th>Канал</th><th>Кому</th><th>Обращение</th><th>Результат</th><th>Запрос</th></tr></thead>
+      <tbody>
+        {% for d in deliveries %}
+        <tr>
+          <td class="nowrap small">{{ d.updated_at|dt }}</td>
+          <td>{{ d.integration.name }}</td>
+          <td>{{ d.event.recipient.short_name|default:"—" }}</td>
+          <td>{% if d.event.appeal %}<a href="{% url 'appeal' d.event.appeal.number %}">{{ d.event.appeal.number }}</a>{% endif %}</td>
+          <td><span class="badge {% if d.status == 'sent' %}tone-good{% elif d.status == 'simulated' %}mode-simulator{% elif d.status == 'failed' %}tone-wait{% else %}tone-muted{% endif %}">{{ d.get_status_display }}</span>
+            {% if d.error %}<div class="small muted">{{ d.error }}</div>{% endif %}</td>
+          <td style="min-width:280px"><details><summary class="small"><code>{{ d.request.method }}</code></summary><pre class="code">{{ d.request|pretty_json }}</pre></details></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty">Доставок пока не было: либо каналы выключены, либо новых событий нет. Уведомления в системе при этом работают.</div>
+  {% endif %}
+</div>
+{% endblock %}

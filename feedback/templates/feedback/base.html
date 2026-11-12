@@ -1,0 +1,64 @@
+{% load static fb %}<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Обратная связь{% endblock %} · Модус Трейд</title>
+  <link rel="stylesheet" href="{% static 'feedback/app.css' %}">
+</head>
+<body>
+{% if demo_mode %}
+<div class="demo-bar">
+  <span><strong>Демо-режим.</strong> Данные синтетические.</span>
+  <span class="{% if clock_shifted %}shifted{% endif %}">Время в системе: {{ system_now|date:"D, d.m.Y H:i" }}{% if clock_shifted %} (перемотано){% endif %}</span>
+  <form method="post" action="{% url 'demo_clock' %}">{% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+    <button name="action" value="1" title="Перемотать время на один рабочий день: сроки и эскалации сработают сами">+1 раб. день</button>
+    <button name="action" value="3">+3 раб. дня</button>
+    {% if clock_shifted %}<button name="action" value="reset">Вернуть время</button>{% endif %}
+  </form>
+  <span class="spacer"></span>
+  <a href="{% url 'landing' %}" style="color:#9ec5f4">Сценарии демо</a>
+  <form method="post" action="{% url 'demo_reset' %}" data-confirm="Загрузить демо-данные заново? Все изменения будут сброшены.">{% csrf_token %}
+    <button>Сбросить данные</button>
+  </form>
+</div>
+{% endif %}
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="{% if me %}{% url 'my' %}{% else %}{% url 'landing' %}{% endif %}">Обратная связь <span>· Модус Трейд</span></a>
+    {% if me %}
+    <nav class="nav" aria-label="Разделы">
+      <a href="{% url 'new' %}" class="{% if nav == 'new' %}on{% endif %}">＋ Подать обращение</a>
+      <a href="{% url 'my' %}" class="{% if nav == 'my' %}on{% endif %}">Мои обращения</a>
+      {% if show_inbox %}<a href="{% url 'inbox' %}" class="{% if nav == 'inbox' %}on{% endif %}">Входящие{% if inbox_count %} <span class="count">{{ inbox_count }}</span>{% endif %}</a>{% endif %}
+      {% if show_registry %}<a href="{% url 'registry' %}" class="{% if nav == 'registry' %}on{% endif %}">Все обращения</a>{% endif %}
+      {% if show_dashboard %}<a href="{% url 'dashboard' %}" class="{% if nav == 'dashboard' %}on{% endif %}">Сводка</a>{% endif %}
+      <a href="{% url 'done' %}" class="{% if nav == 'done' %}on{% endif %}">Сделано</a>
+      <a href="{% url 'rules' %}" class="{% if nav == 'rules' %}on{% endif %}">Правила</a>
+      <a href="{% url 'integrations' %}" class="{% if nav == 'integrations' %}on{% endif %}">Интеграции</a>
+      {% if me.is_admin %}<a href="{% url 'open_admin' %}">Настройки ↗</a>{% endif %}
+    </nav>
+    <div class="who">
+      <a class="bell" href="{% url 'notifications' %}" title="Уведомления">🔔{% if unread_count %} <span class="count alert">{{ unread_count }}</span>{% endif %}</a>
+      <select id="persona" aria-label="Сменить роль" title="В демо вместо входа — переключатель ролей">
+        {% for p in personas %}
+        <option value="{{ p.external_id }}" {% if p.pk == me.pk %}selected{% endif %}>{{ p.short_name }} — {{ p.position }}</option>
+        {% endfor %}
+        <option value="">— выйти к сценариям —</option>
+      </select>
+      <a class="small" href="{% url 'profile' %}">Профиль</a>
+    </div>
+    {% endif %}
+  </div>
+</header>
+<main class="container {% block container_class %}{% endblock %}">
+  {% for message in messages %}
+  <div class="flash {{ message.tags }}" role="status">{{ message }}</div>
+  {% endfor %}
+  {% block content %}{% endblock %}
+</main>
+<script>window.SWITCH_URL = "{% url 'switch' %}"; window.HINTS_URL = "{% url 'hints' %}";</script>
+<script src="{% static 'feedback/app.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{% load fb %}
+{% if similar %}
+<div class="similar field">
+  <strong>Похожие обращения уже есть.</strong>
+  <span class="small secondary">Если это та же тема, нажмите «У меня тоже»: ответственный увидит, что проблема повторяется, а вы получите уведомление о результате.</span>
+  {% for a in similar %}
+  <div class="similar-item row between">
+    <div class="grow">
+      <a href="{% url 'appeal' a.number %}" target="_blank" rel="noopener"><strong>{{ a.number }}</strong></a>
+      <span class="badge tone-{{ a.status|status_tone }}">{{ a.get_status_display }}</span>
+      <div class="small">{{ a.title }}</div>
+    </div>
+    {% if a.author_id != me.pk %}
+    {# Submits the surrounding form to the "me too" action; the form's CSRF token goes with it. #}
+    <button class="btn small" type="submit" formaction="{% url 'action' a.number 'support' %}" formmethod="post" formnovalidate>У меня тоже</button>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}

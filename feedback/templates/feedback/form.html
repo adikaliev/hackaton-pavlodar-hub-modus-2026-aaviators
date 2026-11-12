@@ -1,0 +1,114 @@
+{% extends "feedback/base.html" %}
+{% block title %}Новое обращение{% endblock %}
+{% block container_class %}narrow{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Новое обращение</h1>
+  <p>Проблема, предложение или благодарность. Обязательны три поля: тип, описание и категория.</p>
+</div>
+
+<div class="card tinted">
+  <h3>Что будет с вашим обращением</h3>
+  <ol style="margin:0;padding-left:20px" class="small">
+    <li>Сразу после отправки — номер, ответственный и дата, до которой вам ответят.</li>
+    <li>Первый ответ — обычно за 2 рабочих дня, по срочным быстрее. Решение с обоснованием: по проблеме за 5, по предложению за 10 рабочих дней.</li>
+    <li>Если срок сорван, обращение само уходит руководителю ответственного, затем руководству компании.</li>
+    <li>Отказ тоже приходит с объяснением. После реализации вы подтверждаете, что вопрос решён.</li>
+  </ol>
+</div>
+
+<form method="post" enctype="multipart/form-data" class="card" style="margin-top:14px">
+  {% csrf_token %}
+  <div class="field">
+    <label>Тип обращения</label>
+    <div class="choice">
+      {% for value, label in types %}
+      <label><input type="radio" name="type" value="{{ value }}" {% if values.type == value %}checked{% endif %} required><span>{{ label }}</span></label>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="appeal-text">Что происходит или что вы предлагаете</label>
+    <textarea id="appeal-text" name="text" rows="5" required minlength="10" placeholder="Опишите своими словами. Готовое решение не обязательно: сообщить о проблеме уже полезно.">{{ values.text }}</textarea>
+  </div>
+
+  <div id="hints"></div>
+
+  <div class="field">
+    <label for="category">Категория</label>
+    <select id="category" name="category" required>
+      <option value="">— выберите —</option>
+      {% for group in groups %}
+      <optgroup label="{{ group.name }}">
+        {% for c in group.categories.all %}{% if c.is_active %}
+        <option value="{{ c.pk }}" {% if values.category == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>
+        {% endif %}{% endfor %}
+      </optgroup>
+      {% endfor %}
+    </select>
+    <div id="category-suggestion" class="hint hidden">Похоже на категорию «<b></b>». <button type="button" class="btn small">Выбрать</button></div>
+    <div class="hint">По категории система сама находит ответственного. Не знаете — выберите «Не знаю, куда отнести»: обращение получит координатор.</div>
+  </div>
+
+  <div class="field">
+    <label for="solution">Как это можно решить <span class="muted" style="font-weight:400">— необязательно</span></label>
+    <textarea id="solution" name="proposed_solution" rows="2">{{ values.proposed_solution }}</textarea>
+  </div>
+
+  <div class="field">
+    <label for="files">Фото или файл <span class="muted" style="font-weight:400">— необязательно</span></label>
+    <input id="files" type="file" name="files" multiple accept="image/*,.pdf,.txt,.csv,.doc,.docx,.xls,.xlsx">
+    <div class="hint">До {{ max_mb }} МБ на файл. С телефона можно сразу сфотографировать.</div>
+  </div>
+
+  <div class="field">
+    <label>Срочность</label>
+    <div class="choice">
+      <label><input type="radio" name="priority" value="medium" {% if values.priority != 'high' and values.priority != 'low' %}checked{% endif %}><span>Обычная</span></label>
+      <label><input type="radio" name="priority" value="high" {% if values.priority == 'high' %}checked{% endif %}><span>Срочно — сроки вдвое короче</span></label>
+      <label><input type="radio" name="priority" value="low" {% if values.priority == 'low' %}checked{% endif %}><span>Не срочно</span></label>
+    </div>
+  </div>
+
+  <div class="field stack">
+    <label class="check"><input type="checkbox" name="published" {% if values.published %}checked{% endif %}>
+      <span>Показывать обращение коллегам. Они смогут отметить «у меня тоже», а результат попадёт в ленту «Сделано».</span></label>
+    <label class="check"><input type="checkbox" name="confidential" {% if values.confidential %}checked{% endif %}>
+      <span><strong>Конфиденциально.</strong> Ответственный и руководитель подразделения не увидят моё имя; его видят только координатор и руководство. Задать мне уточняющий вопрос всё равно можно.</span></label>
+    <label class="check"><input type="checkbox" name="sensitive" id="sensitive" {% if values.sensitive %}checked{% endif %}>
+      <span><strong>Обращение касается действий конкретного человека.</strong> Оно никогда не попадёт к этому человеку и станет конфиденциальным автоматически.</span></label>
+    <div data-show-when="#sensitive" class="hidden">
+      <label for="about">О чьих действиях идёт речь</label>
+      <select id="about" name="about_person">
+        <option value="">— не указывать —</option>
+        {% for p in people %}<option value="{{ p.pk }}" {% if values.about_person == p.pk|stringformat:"s" %}selected{% endif %}>{{ p.full_name }} — {{ p.position }}</option>{% endfor %}
+      </select>
+    </div>
+  </div>
+
+  {% if can_register_for_others %}
+  <div class="field card flat" style="background:var(--plane)">
+    <label class="check"><input type="checkbox" name="on_behalf" id="on-behalf" {% if values.on_behalf %}checked{% endif %}>
+      <span><strong>Регистрирую со слов сотрудника</strong> — замечание с совещания, из звонка или письма. Автором будет сотрудник: он получит уведомления и ответ.</span></label>
+    <div data-show-when="#on-behalf" class="hidden inline-fields" style="margin-top:10px">
+      <div>
+        <label for="author">Сотрудник</label>
+        <select id="author" name="author">
+          <option value="">— выберите —</option>
+          {% for p in people %}<option value="{{ p.pk }}" {% if values.author == p.pk|stringformat:"s" %}selected{% endif %}>{{ p.full_name }} — {{ p.position }}</option>{% endfor %}
+        </select>
+      </div>
+      <div>
+        <label for="source">Откуда</label>
+        <select id="source" name="source">
+          {% for value, label in sources %}<option value="{{ value }}" {% if values.source == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <button class="btn primary" type="submit">Отправить обращение</button>
+</form>
+{% endblock %}

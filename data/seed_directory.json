@@ -1,0 +1,57 @@
+{
+  "_comment": "Синтетический справочник в формате ответов REST API Битрикс24 (department.get и user.get). Все имена вымышлены. Этот же формат читает импорт справочника; после подключения портала заказчика данные придут из реального API.",
+  "department.get": {
+    "result": [
+      {"ID": "1", "NAME": "ГК «Модус Трейд»", "SORT": 100, "UF_HEAD": "1"},
+      {"ID": "2", "NAME": "Коммерческое направление", "SORT": 200, "PARENT": "1", "UF_HEAD": "2"},
+      {"ID": "3", "NAME": "Отдел продаж", "SORT": 210, "PARENT": "2", "UF_HEAD": "3"},
+      {"ID": "4", "NAME": "Отдел закупок", "SORT": 220, "PARENT": "2", "UF_HEAD": "6"},
+      {"ID": "5", "NAME": "Проектное направление", "SORT": 300, "PARENT": "1", "UF_HEAD": "9"},
+      {"ID": "6", "NAME": "Проектный офис", "SORT": 310, "PARENT": "5", "UF_HEAD": "10"},
+      {"ID": "7", "NAME": "Отдел проектирования", "SORT": 320, "PARENT": "5", "UF_HEAD": "13"},
+      {"ID": "8", "NAME": "Финансы и администрация", "SORT": 400, "PARENT": "1", "UF_HEAD": "15"},
+      {"ID": "9", "NAME": "Бухгалтерия", "SORT": 410, "PARENT": "8", "UF_HEAD": "16"},
+      {"ID": "10", "NAME": "Административный отдел", "SORT": 420, "PARENT": "8", "UF_HEAD": "18"},
+      {"ID": "11", "NAME": "Отдел персонала", "SORT": 430, "PARENT": "8", "UF_HEAD": "21"},
+      {"ID": "12", "NAME": "Техническое направление", "SORT": 500, "PARENT": "1", "UF_HEAD": "22"},
+      {"ID": "13", "NAME": "IT-отдел", "SORT": 510, "PARENT": "12", "UF_HEAD": "23"},
+      {"ID": "14", "NAME": "Сервисная служба", "SORT": 520, "PARENT": "12", "UF_HEAD": "25"}
+    ],
+    "total": 14
+  },
+  "user.get": {
+    "result": [
+      {"ID": "1", "ACTIVE": true, "NAME": "Арман", "LAST_NAME": "Нуржанов", "EMAIL": "a.nurzhanov@modus.example", "WORK_POSITION": "Генеральный директор", "UF_DEPARTMENT": [1]},
+      {"ID": "2", "ACTIVE": true, "NAME": "Ольга", "LAST_NAME": "Белова", "EMAIL": "o.belova@modus.example", "WORK_POSITION": "Коммерческий директор", "UF_DEPARTMENT": [2]},
+      {"ID": "3", "ACTIVE": true, "NAME": "Тимур", "LAST_NAME": "Касымов", "EMAIL": "t.kasymov@modus.example", "WORK_POSITION": "Руководитель отдела продаж", "UF_DEPARTMENT": [3]},
+      {"ID": "4", "ACTIVE": true, "NAME": "Дарья", "LAST_NAME": "Миронова", "EMAIL": "d.mironova@modus.example", "WORK_POSITION": "Менеджер по продажам", "UF_DEPARTMENT": [3]},
+      {"ID": "5", "ACTIVE": true, "NAME": "Ерлан", "LAST_NAME": "Сапаров", "EMAIL": "e.saparov@modus.example", "WORK_POSITION": "Менеджер по продажам", "UF_DEPARTMENT": [3]},
+      {"ID": "6", "ACTIVE": true, "NAME": "Гульнара", "LAST_NAME": "Ахметова", "EMAIL": "g.akhmetova@modus.example", "WORK_POSITION": "Руководитель отдела закупок", "UF_DEPARTMENT": [4]},
+      {"ID": "7", "ACTIVE": true, "NAME": "Алексей", "LAST_NAME": "Громов", "EMAIL": "a.gromov@modus.example", "WORK_POSITION": "Специалист по закупкам", "UF_DEPARTMENT": [4]},
+      {"ID": "8", "ACTIVE": true, "NAME": "Айгерим", "LAST_NAME": "Тулегенова", "EMAIL": "a.tulegenova@modus.example", "WORK_POSITION": "Специалист по номенклатуре", "UF_DEPARTMENT": [4]},
+      {"ID": "9", "ACTIVE": true, "NAME": "Сергей", "LAST_NAME": "Ковалёв", "EMAIL": "s.kovalev@modus.example", "WORK_POSITION": "Директор по проектам", "UF_DEPARTMENT": [5]},
+      {"ID": "10", "ACTIVE": true, "NAME": "Марат", "LAST_NAME": "Ибраев", "EMAIL": "m.ibraev@modus.example", "WORK_POSITION": "Руководитель проектного офиса", "UF_DEPARTMENT": [6]},
+      {"ID": "11", "ACTIVE": true, "NAME": "Анна", "LAST_NAME": "Литвинова", "EMAIL": "a.litvinova@modus.example", "WORK_POSITION": "Координатор проектов", "UF_DEPARTMENT": [6]},
+      {"ID": "12", "ACTIVE": true, "NAME": "Бауыржан", "LAST_NAME": "Омаров", "EMAIL": "b.omarov@modus.example", "WORK_POSITION": "Руководитель проекта", "UF_DEPARTMENT": [6]},
+      {"ID": "13", "ACTIVE": true, "NAME": "Виктор", "LAST_NAME": "Зайцев", "EMAIL": "v.zaitsev@modus.example", "WORK_POSITION": "Руководитель отдела проектирования", "UF_DEPARTMENT": [7]},
+      {"ID": "14", "ACTIVE": true, "NAME": "Жанна", "LAST_NAME": "Абдрахманова", "EMAIL": "zh.abdrakhmanova@modus.example", "WORK_POSITION": "Инженер-проектировщик", "UF_DEPARTMENT": [7]},
+      {"ID": "15", "ACTIVE": true, "NAME": "Наталья", "LAST_NAME": "Орлова", "EMAIL": "n.orlova@modus.example", "WORK_POSITION": "Финансовый директор", "UF_DEPARTMENT": [8]},
+      {"ID": "16", "ACTIVE": true, "NAME": "Сауле", "LAST_NAME": "Жумабаева", "EMAIL": "s.zhumabaeva@modus.example", "WORK_POSITION": "Главный бухгалтер", "UF_DEPARTMENT": [9]},
+      {"ID": "17", "ACTIVE": true, "NAME": "Ирина", "LAST_NAME": "Соколова", "EMAIL": "i.sokolova@modus.example", "WORK_POSITION": "Бухгалтер", "UF_DEPARTMENT": [9]},
+      {"ID": "18", "ACTIVE": true, "NAME": "Павел", "LAST_NAME": "Денисов", "EMAIL": "p.denisov@modus.example", "WORK_POSITION": "Руководитель административного отдела", "UF_DEPARTMENT": [10]},
+      {"ID": "19", "ACTIVE": true, "NAME": "Мадина", "LAST_NAME": "Сейткали", "EMAIL": "m.seitkali@modus.example", "WORK_POSITION": "Офис-менеджер", "UF_DEPARTMENT": [10]},
+      {"ID": "20", "ACTIVE": true, "NAME": "Елена", "LAST_NAME": "Кравец", "EMAIL": "e.kravets@modus.example", "WORK_POSITION": "Делопроизводитель", "UF_DEPARTMENT": [10]},
+      {"ID": "21", "ACTIVE": true, "NAME": "Асель", "LAST_NAME": "Нурланова", "EMAIL": "a.nurlanova@modus.example", "WORK_POSITION": "HR-менеджер", "UF_DEPARTMENT": [11]},
+      {"ID": "22", "ACTIVE": true, "NAME": "Дмитрий", "LAST_NAME": "Волков", "EMAIL": "d.volkov@modus.example", "WORK_POSITION": "Технический директор", "UF_DEPARTMENT": [12]},
+      {"ID": "23", "ACTIVE": true, "NAME": "Руслан", "LAST_NAME": "Бекмуханов", "EMAIL": "r.bekmukhanov@modus.example", "WORK_POSITION": "Руководитель IT-отдела", "UF_DEPARTMENT": [13]},
+      {"ID": "24", "ACTIVE": true, "NAME": "Никита", "LAST_NAME": "Фролов", "EMAIL": "n.frolov@modus.example", "WORK_POSITION": "IT-специалист", "UF_DEPARTMENT": [13]},
+      {"ID": "25", "ACTIVE": true, "NAME": "Канат", "LAST_NAME": "Есенов", "EMAIL": "k.esenov@modus.example", "WORK_POSITION": "Руководитель сервисной службы", "UF_DEPARTMENT": [14]},
+      {"ID": "26", "ACTIVE": true, "NAME": "Игорь", "LAST_NAME": "Савченко", "EMAIL": "i.savchenko@modus.example", "WORK_POSITION": "Сервисный инженер", "UF_DEPARTMENT": [14]},
+      {"ID": "27", "ACTIVE": true, "NAME": "Азамат", "LAST_NAME": "Рахимов", "EMAIL": "a.rakhimov@modus.example", "WORK_POSITION": "Инженер пусконаладки", "UF_DEPARTMENT": [14]},
+      {"ID": "28", "ACTIVE": true, "NAME": "Юлия", "LAST_NAME": "Панова", "EMAIL": "yu.panova@modus.example", "WORK_POSITION": "Юрист по договорам", "UF_DEPARTMENT": [8]},
+      {"ID": "29", "ACTIVE": true, "NAME": "Камила", "LAST_NAME": "Ержанова", "EMAIL": "k.erzhanova@modus.example", "WORK_POSITION": "Специалист по обучению", "UF_DEPARTMENT": [11]},
+      {"ID": "30", "ACTIVE": true, "NAME": "Олжас", "LAST_NAME": "Турсунов", "EMAIL": "o.tursunov@modus.example", "WORK_POSITION": "Руководитель по качеству и процессам", "UF_DEPARTMENT": [1]}
+    ],
+    "total": 30
+  }
+}

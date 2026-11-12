@@ -1,0 +1,191 @@
+{% extends "feedback/base.html" %}
+{% load fb %}
+{% block title %}Сводка{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Сводка</h1>
+  <p>{{ scope_note }} · всего обращений: {{ m.total }}, открытых: {{ m.open }}. Цифры считаются на момент открытия страницы.</p>
+</div>
+
+<h2>Показатели из технического задания</h2>
+<div class="kpis">
+  <div class="kpi" title="Обращения, по которым зафиксировано решение, от всех обращений">
+    <div class="label">Доля рассмотренных</div>
+    <div class="value">{{ m.reviewed_share }}<small>%</small></div>
+    <div class="note">{{ m.reviewed }} из {{ m.total }}: по ним принято решение</div>
+  </div>
+  <div class="kpi" title="Среднее рабочее время от регистрации до первого действия ответственного">
+    <div class="label">Время до первого ответа</div>
+    <div class="value">{{ m.avg_response }}</div>
+    <div class="note">в среднем, в рабочем времени · по {{ m.responded }} обращениям</div>
+  </div>
+  <div class="kpi" title="Завершённые обращения с письменным итогом или обоснованием, от всех обращений">
+    <div class="label">С зафиксированным результатом</div>
+    <div class="value">{{ m.outcome_share }}<small>%</small></div>
+    <div class="note">{{ m.with_outcome }} из {{ m.total }}: завершены с письменным итогом</div>
+  </div>
+  <div class="kpi" title="Принятые проблемы и предложения, доведённые до результата">
+    <div class="label">Реализовано улучшений</div>
+    <div class="value">{{ m.implemented }}</div>
+    <div class="note">доля закрытых обращений: {{ m.closed_share }}%</div>
+  </div>
+</div>
+
+<h2 style="margin-top:24px">Ничего не теряется</h2>
+<div class="kpis">
+  <div class="kpi {% if m.overdue_count %}alert{% endif %}">
+    <div class="label">Просрочено сейчас</div>
+    <div class="value">{{ m.overdue_count }}</div>
+    <div class="state {% if not m.overdue_count %}fine{% endif %}"><span class="icon" aria-hidden="true">{% if m.overdue_count %}▲{% else %}✓{% endif %}</span>
+      {% if m.overdue_count %}<a href="{% url 'registry' %}?deadline=overdue">показать список</a>{% else %}всё в срок{% endif %}</div>
+  </div>
+  <div class="kpi {% if m.escalated %}alert{% endif %}">
+    <div class="label">Дошло до руководства</div>
+    <div class="value">{{ m.escalated|length }}</div>
+    <div class="note">просрочка 3 рабочих дня и больше</div>
+  </div>
+  <div class="kpi" title="Первые ответы, данные в срок, от всех обращений, по которым срок первого ответа уже наступил или ответ дан">
+    <div class="label">Первый ответ в срок</div>
+    <div class="value">{{ m.on_time_share }}<small>%</small></div>
+    <div class="note">{{ m.on_time }} из {{ m.judged }}</div>
+  </div>
+  <div class="kpi" title="Обращения, где ответственного назначили правила и никто не переназначал вручную">
+    <div class="label">Назначено правилами</div>
+    <div class="value">{{ m.auto_share }}<small>%</small></div>
+    <div class="note">без ручного шага · до координатора дошло: {{ m.to_coordinator }}</div>
+  </div>
+</div>
+
+<div class="cols" style="margin-top:14px">
+  <div class="card">
+    <h2>Кто что держит</h2>
+    {% if m.holders %}
+    <p class="small muted">Просроченные обращения по ответственным. Полоса — доля просроченных среди обращений в работе у человека.</p>
+    {% for h in m.holders %}
+    <div class="meter-row" title="{{ h.person.full_name }}: просрочено {{ h.overdue }} из {{ h.open }}, самая долгая просрочка — {{ h.max_days }} раб. дн.">
+      <div><a class="who-name" href="{% url 'registry' %}?assignee={{ h.person.pk }}&deadline=overdue">{{ h.person.short_name }}</a>
+        <span class="muted small">{{ h.department.name|default:"" }}</span></div>
+      <div class="meter" role="img" aria-label="Просрочено {{ h.overdue }} из {{ h.open }}"><span style="width:{{ h.width }}%"></span></div>
+      <div class="figure"><strong>{{ h.overdue }}</strong> из {{ h.open }}<br><span class="muted">до {{ h.max_days }} раб. дн.</span></div>
+    </div>
+    {% endfor %}
+    {% else %}<div class="empty">Просроченных обращений нет.</div>{% endif %}
+  </div>
+
+  <div class="card">
+    <h2>Просрочка по подразделениям</h2>
+    {% if m.departments %}
+    <p class="small muted">Подразделение ответственного. Полоса — доля просроченных среди обращений в работе.</p>
+    {% for d in m.departments %}
+    <div class="meter-row" title="{{ d.label }}: просрочено {{ d.overdue }} из {{ d.open }}">
+      <div><span class="who-name">{{ d.label }}</span></div>
+      <div class="meter" role="img" aria-label="Просрочено {{ d.overdue }} из {{ d.open }}"><span style="width:{{ d.width }}%"></span></div>
+      <div class="figure"><strong>{{ d.overdue }}</strong> из {{ d.open }}</div>
+    </div>
+    {% endfor %}
+    {% else %}<div class="empty">Просроченных обращений нет.</div>{% endif %}
+  </div>
+</div>
+
+{% if m.overdue_rows %}
+<div class="card" style="margin-top:14px">
+  <h2>Просроченные обращения</h2>
+  <div class="table-wrap">
+    <table class="table responsive">
+      <thead><tr><th>№</th><th>Обращение</th><th>Ответственный</th><th>Что просрочено</th><th>Где сейчас</th></tr></thead>
+      <tbody>
+        {% for r in m.overdue_rows %}{% with a=r.appeal d=r.deadline %}
+        <tr class="is-overdue">
+          <td class="num"><a href="{% url 'appeal' a.number %}"><strong>{{ a.number }}</strong></a></td>
+          <td><a class="title" href="{% url 'appeal' a.number %}">{{ a.title }}</a><span class="small secondary">{{ a.get_type_display }} · {{ a.category.name }}</span></td>
+          <td>{{ a.assignee.short_name }}<br><span class="muted small">{{ a.assignee.department.name }}</span></td>
+          <td><span class="deadline tone-critical"><span class="icon" aria-hidden="true">▲</span><span>{{ d.label }}</span></span><div class="muted small">{{ d.kind }}</div></td>
+          <td>{% if a.escalation_level >= 2 %}<strong>у руководства</strong>{% elif a.escalation_level == 1 %}у руководителя: {{ a.escalated_to.short_name|default:"—" }}{% else %}у ответственного{% endif %}</td>
+        </tr>
+        {% endwith %}{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<div class="cols" style="margin-top:14px">
+  <div class="card">
+    <h2>По статусам</h2>
+    <div class="bars">
+      {% for b in m.by_status %}
+      <div class="bar-row" title="{{ b.label }}: {{ b.count }}"><span class="name">{{ b.label }}</span><span class="bar-track"><span class="bar-fill" style="width:{{ b.width }}%"></span></span><span class="figure">{{ b.count }}</span></div>
+      {% endfor %}
+    </div>
+    <h2 style="margin-top:20px">По типам</h2>
+    <div class="bars">
+      {% for b in m.by_type %}
+      <div class="bar-row" title="{{ b.label }}: {{ b.count }}"><span class="name">{{ b.label }}</span><span class="bar-track"><span class="bar-fill" style="width:{{ b.width }}%"></span></span><span class="figure">{{ b.count }}</span></div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Где копятся обращения</h2>
+    <p class="small muted">Направления за последние 14 дней; рядом — изменение к предыдущим 14 дням.</p>
+    <div class="bars">
+      {% for t in m.themes %}
+      <div class="bar-row" title="{{ t.label }}: {{ t.recent }} за 14 дней, {{ t.earlier }} за предыдущие 14 дней, всего {{ t.count }}">
+        <span class="name">{{ t.label }}</span>
+        <span class="bar-track"><span class="bar-fill" style="width:{{ t.width }}%"></span></span>
+        <span class="figure">{{ t.recent }}<span class="delta">{% if t.delta > 0 %}+{{ t.delta }}{% elif t.delta < 0 %}{{ t.delta }}{% else %}±0{% endif %}</span></span>
+      </div>
+      {% endfor %}
+    </div>
+    <h2 style="margin-top:20px">Чаще всего: категории</h2>
+    <div class="bars">
+      {% for b in m.by_category %}
+      <div class="bar-row" title="{{ b.label }}: {{ b.count }}"><span class="name">{{ b.label }}</span><span class="bar-track"><span class="bar-fill" style="width:{{ b.width }}%"></span></span><span class="figure">{{ b.count }}</span></div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<div class="cols" style="margin-top:14px">
+  <div class="card">
+    <h2>Повторяющиеся проблемы</h2>
+    {% if m.recurring %}
+    <p class="small muted">Обращения, которые поддержали коллеги («у меня тоже») или к которым присоединили дубликаты.</p>
+    <table class="table">
+      <tbody>
+        {% for item in m.recurring %}
+        <tr>
+          <td><a class="title" href="{% url 'appeal' item.appeal.number %}">{{ item.appeal.title }}</a>
+            <span class="small secondary">{{ item.appeal.number }} · {{ item.appeal.category.name }} · {{ item.appeal.get_status_display|lower }}</span></td>
+          <td class="right nowrap"><strong>{{ item.repeats|add:1 }}</strong> <span class="muted small">чел.</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<div class="empty">Повторов пока нет.</div>{% endif %}
+  </div>
+
+  <div class="card">
+    <h2>Новые обращения по неделям</h2>
+    <div class="columns" role="img" aria-label="Число новых обращений по неделям">
+      {% for w in m.weeks %}
+      <div class="column" title="Неделя с {{ w.start|day }}: {{ w.count }}">
+        {% if w.count and forloop.last or w.count and w.height == 100 %}<span class="col-value">{{ w.count }}</span>{% endif %}
+        <span class="col-fill" style="height:{{ w.height }}%"></span>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="column-labels">{% for w in m.weeks %}<span>{{ w.label }}</span>{% endfor %}</div>
+    <p class="legend-line">Неделя начинается с указанной даты. Наведите на столбец, чтобы увидеть число.</p>
+
+    <h2 style="margin-top:20px">Сделано по предложениям</h2>
+    {% for a in done %}
+    <div class="feed-item">
+      <a class="title" href="{% url 'appeal' a.number %}"><strong>{{ a.title }}</strong></a>
+      <div class="small secondary">{{ a.result|truncatechars:140 }}</div>
+    </div>
+    {% empty %}<div class="empty">Пока ничего.</div>{% endfor %}
+    <p style="margin:12px 0 0"><a href="{% url 'done' %}">Вся лента →</a></p>
+  </div>
+</div>
+{% endblock %}

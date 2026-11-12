@@ -1,0 +1,81 @@
+{% extends "feedback/base.html" %}
+{% block title %}Демо{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>Гарантированный ответ, а не ящик для предложений</h1>
+  <p class="lead">Сотрудник сообщает о проблеме или предлагает улучшение. У обращения сразу есть номер, ответственный и срок.
+    Если ответа нет, обращение само поднимается к руководителю подразделения, а затем к руководству компании.</p>
+</section>
+
+{% if not has_data %}
+<div class="flash error">Демо-данные ещё не загружены. Выполните <code>python manage.py seed_demo</code> или нажмите «Сбросить данные» вверху.</div>
+{% endif %}
+{% if next %}
+<div class="flash">Чтобы открыть эту страницу, выберите роль ниже.</div>
+{% endif %}
+
+<div class="card tinted">
+  <h2>Как смотреть демо</h2>
+  <p>Входа по паролю в демо нет. Выберите сценарий — система откроется от имени нужного сотрудника.
+    Сменить роль можно в любой момент в правом верхнем углу.</p>
+  <p style="margin:0"><strong>Время можно перемотать.</strong> Подайте обращение и нажмите «+3 раб. дня» в тёмной полосе сверху:
+    срок первого ответа истечёт, обращение появится у руководителя, а ещё через два дня — у руководства.
+    Каждый шаг записывается в историю обращения. «Сбросить данные» возвращает всё в исходное состояние.</p>
+</div>
+
+<h2 style="margin-top:26px">Шесть проверочных сценариев из набора организаторов</h2>
+<div class="cols">
+  {% for s in scenarios %}
+  <div class="card scenario">
+    <div class="n">{{ s.n }}</div>
+    <div>
+      <h3>{{ s.title }}</h3>
+      <p class="secondary small">{{ s.what }}</p>
+      <div class="links">
+        {% for step in s.steps %}
+        <a class="go" href="{{ step.url }}"><span>{{ step.label }}</span><span class="as">как {{ step.who.short_name }} · {{ step.who.position|lower }}</span></a>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<h2 style="margin-top:26px">Что ещё посмотреть</h2>
+<div class="cols">
+  {% for step in extras %}
+  <a class="go" href="{{ step.url }}"><span>{{ step.label }}</span><span class="as">как {{ step.who.short_name }} · {{ step.who.position|lower }}</span></a>
+  {% endfor %}
+</div>
+
+<h2 style="margin-top:26px">Что реализовано, что имитируется, что в планах</h2>
+<div class="legend3">
+  <div class="card flat">
+    <span class="badge mode-real">Реализовано</span>
+    <p class="small" style="margin-top:8px">Подача с вложениями и квитанцией; маршрутизация по правилам с замещением; статусы, переписка с автором,
+      внутренние комментарии; сроки в рабочих днях, пауза, продление; автоматическая эскалация; поиск и фильтры; сводка;
+      конфиденциальный режим; регистрация со слов сотрудника; подтверждение результата автором; «у меня тоже» и объединение дубликатов;
+      уведомления в системе; журнал исходящих событий; Telegram-бот (нужен токен).</p>
+  </div>
+  <div class="card flat">
+    <span class="badge mode-simulator">Имитация</span>
+    <p class="small" style="margin-top:8px">Битрикс24: доступа к порталу заказчика у нас нет. Вместо отправки уведомления записывается точный REST-запрос,
+      а справочник сотрудников загружается из файла в формате ответов Битрикс24. Вход — переключатель ролей.</p>
+  </div>
+  <div class="card flat">
+    <span class="badge mode-planned">В планах</span>
+    <p class="small" style="margin-top:8px">Вход через Битрикс24, задачи из решений, встраивание в портал, подача через Telegram Mini App,
+      приём писем, контекст из 1С, анонимный режим, ИИ-подсказки, казахский интерфейс, обратная связь клиентов и опросы.</p>
+  </div>
+</div>
+
+<h2 style="margin-top:26px">Или войдите как любой сотрудник</h2>
+<div class="persona-list">
+  {% for p in personas %}
+  <a href="{% url 'login_as' p.external_id %}{% if next %}?next={{ next|urlencode }}{% endif %}">
+    {{ p.full_name }}{% if p.absent %} <span class="pill">{{ p.absence_note|default:"отсутствует" }}</span>{% endif %}
+    <small>{{ p.position }}{% if p.access != 'employee' %} · {{ p.get_access_display|lower }}{% endif %}</small>
+  </a>
+  {% endfor %}
+</div>
+{% endblock %}

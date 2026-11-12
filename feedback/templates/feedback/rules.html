@@ -1,0 +1,80 @@
+{% extends "feedback/base.html" %}
+{% load fb %}
+{% block title %}Правила маршрутизации{% endblock %}
+{% block content %}
+<div class="page-head row between">
+  <div>
+    <h1>Правила маршрутизации</h1>
+    <p>Ответственного назначает система. Правила проверяются по порядку, срабатывает первое подходящее. Правило называет роль, а человека система находит по справочнику.</p>
+  </div>
+  {% if me.is_admin %}<a class="btn" href="{% url 'open_admin' %}?next=/admin/feedback/routingrule/">Изменить правила ↗</a>{% endif %}
+</div>
+
+<div class="split">
+  <div class="card">
+    <div class="table-wrap">
+      <table class="table responsive">
+        <thead><tr><th>№</th><th>Условие</th><th>Кому</th><th>Сейчас это</th><th class="right">Сработало</th></tr></thead>
+        <tbody>
+          {% for r in rules %}
+          <tr>
+            <td class="num">{{ r.order }}</td>
+            <td><span class="title">{{ r.name }}</span><span class="small secondary">{{ r.conditions_text }}</span>{% if not r.is_active %} <span class="pill">выключено</span>{% endif %}</td>
+            <td>{{ r.target_label }}</td>
+            <td>{% if r.holder_now %}{{ r.holder_now.short_name }}
+              {% if r.holder_now.absent %}<br><span class="pill">{{ r.holder_now.absence_note|default:"отсутствует" }}</span>
+              <span class="small muted">→ {{ r.holder_now.deputy.short_name|default:"руководитель" }}</span>{% endif %}
+              {% else %}<span class="muted small">по оргструктуре</span>{% endif %}</td>
+            <td class="right num">{{ r.fired }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p class="small muted" style="margin:12px 0 0">Если человек недоступен или обращение касается его самого, срабатывает цепочка замещения:
+      заместитель → руководитель подразделения → координатор → руководство. Обращение без ответственного не остаётся.</p>
+  </div>
+
+  <aside class="stack">
+    <div class="card">
+      <h2>Кто получит обращение?</h2>
+      <p class="small muted">Проверка правил без создания обращения.</p>
+      <form method="get">
+        <input type="hidden" name="check" value="1">
+        <div class="field"><label for="c-type">Тип</label>
+          <select id="c-type" name="type">{% for value, label in types %}<option value="{{ value }}" {% if values.type == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+        <div class="field"><label for="c-cat">Категория</label>
+          <select id="c-cat" name="category" required><option value="">— выберите —</option>
+            {% for g in groups %}<optgroup label="{{ g.name }}">{% for c in g.categories.all %}<option value="{{ c.pk }}" {% if values.category == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>{% endfor %}</optgroup>{% endfor %}
+          </select></div>
+        <div class="field"><label for="c-author">Автор</label>
+          <select id="c-author" name="author" required><option value="">— выберите —</option>
+            {% for p in people %}<option value="{{ p.pk }}" {% if values.author == p.pk|stringformat:"s" %}selected{% endif %}>{{ p.short_name }} — {{ p.position }}</option>{% endfor %}
+          </select></div>
+        <div class="field"><label for="c-about">Касается действий <span class="muted" style="font-weight:400">— необязательно</span></label>
+          <select id="c-about" name="about"><option value="">—</option>
+            {% for p in people %}<option value="{{ p.pk }}" {% if values.about == p.pk|stringformat:"s" %}selected{% endif %}>{{ p.short_name }} — {{ p.position }}</option>{% endfor %}
+          </select></div>
+        <button class="btn primary block">Проверить</button>
+      </form>
+      {% if result %}
+      <div class="card flat receipt" style="margin-top:12px">
+        <div class="small secondary">Получит</div>
+        <div class="big" style="font-size:18px">{{ result.assignee.full_name|default:"никто" }}</div>
+        {% if result.assignee %}<div class="small muted">{{ result.assignee.position }}</div>{% endif %}
+        <ul class="small" style="margin:8px 0 0;padding-left:18px">{% for line in result.trail %}<li>{{ line }}</li>{% endfor %}</ul>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <h2>Кто сейчас отсутствует</h2>
+      {% for p in absent %}
+      <p style="margin-bottom:6px"><strong>{{ p.full_name }}</strong> <span class="pill">{{ p.absence_note|default:"отсутствует" }}</span><br>
+        <span class="small muted">{{ p.position }} · замещает: {{ p.deputy.full_name|default:"руководитель подразделения" }}</span></p>
+      {% empty %}<p class="muted" style="margin:0">Все на месте.</p>{% endfor %}
+      <p class="small muted" style="margin:8px 0 0">Отметка об отсутствии и заместитель — в справочнике сотрудников. Позже — из графика отсутствий Битрикс24.</p>
+    </div>
+  </aside>
+</div>
+{% endblock %}

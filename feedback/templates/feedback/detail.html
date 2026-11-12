@@ -1,0 +1,343 @@
+{% extends "feedback/base.html" %}
+{% load fb %}
+{% block title %}{{ appeal.number }}{% endblock %}
+{% block content %}
+{% with here=request.get_full_path %}
+<div class="page-head">
+  <div class="row">
+    <span class="muted">{{ appeal.number }} · {{ appeal.get_type_display }} · {{ appeal.category.name }}</span>
+    <span class="badge tone-{{ appeal.status|status_tone }}">{{ appeal.get_status_display }}</span>
+    {% if appeal.priority == 'high' %}<span class="pill high">срочно</span>{% endif %}
+    {% if appeal.is_confidential %}<span class="pill lock">конфиденциально</span>{% endif %}
+    {% if appeal.registered_by_id %}<span class="pill">со слов сотрудника · {{ appeal.get_source_display|lower }}</span>{% endif %}
+  </div>
+  <h1 style="margin-top:6px">{{ appeal.title }}</h1>
+</div>
+
+{% if receipt %}
+<div class="card receipt" style="margin-bottom:14px">
+  <div class="small secondary">Обращение зарегистрировано</div>
+  <div class="big">{{ appeal.number }}</div>
+  <dl class="facts" style="margin-top:8px">
+    <dt>Ответственный</dt><dd><strong>{{ appeal.assignee.full_name|default:"назначается" }}</strong>{% if appeal.assignee %}, {{ appeal.assignee.position|lower }}{% endif %}</dd>
+    <dt>Первый ответ</dt><dd>не позднее <strong>{{ appeal.first_response_due|day }}</strong></dd>
+    <dt>Решение</dt><dd>не позднее <strong>{{ appeal.decision_due|day }}</strong></dd>
+  </dl>
+  <p class="small secondary" style="margin:8px 0 0">Если ответа не будет в срок, обращение автоматически уйдёт руководителю ответственного. Следить за ходом можно в разделе «Мои обращения».</p>
+</div>
+{% endif %}
+
+<div class="split">
+  <div class="stack">
+
+    <div class="card">
+      {% if mode == 'author' %}<div style="font-size:18px;font-weight:700">{{ appeal.author_status_text }}</div>{% endif %}
+      <div class="stages" aria-label="Этап рассмотрения">
+        <div class="stage {% if appeal.stage == 1 %}now{% elif appeal.stage > 1 %}done{% endif %}">1 · Рассмотрение</div>
+        <div class="stage {% if appeal.stage == 2 %}now{% elif appeal.stage > 2 %}done{% endif %}">2 · Решение</div>
+        <div class="stage {% if appeal.stage == 3 %}now{% elif appeal.stage > 3 %}{% if appeal.status == 'closed' %}final-good{% else %}final-muted{% endif %}{% endif %}">3 · {% if appeal.status == 'rejected' %}Отклонено{% elif appeal.status == 'duplicate' %}Объединено{% elif appeal.status == 'closed' %}Закрыто{% else %}Реализация{% endif %}</div>
+      </div>
+      {% if deadline.label %}
+      <p style="margin:12px 0 0">
+        <span class="deadline tone-{{ deadline.tone }}"><span class="icon" aria-hidden="true">{{ deadline.icon }}</span>
+          <span>{% if deadline.kind and deadline.tone != 'wait' %}{{ deadline.kind }}: {% endif %}{{ deadline.label }}{% if deadline.where %} — {{ deadline.where }}{% endif %}</span></span>
+      </p>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <p class="quote">{{ appeal.text }}</p>
+      {% if appeal.proposed_solution %}
+      <h3 style="margin-top:14px">Предлагаемое решение</h3>
+      <p class="quote" style="font-size:15px">{{ appeal.proposed_solution }}</p>
+      {% endif %}
+      {% if attachments %}
+      <h3 style="margin-top:14px">Вложения</h3>
+      {% for file in attachments %}
+      <div><a href="{% url 'attachment' file.pk %}">📎 {{ file.name }}</a> <span class="muted small">{{ file.size|filesize }}</span></div>
+      {% endfor %}
+      {% endif %}
+      {% if appeal.duplicate_of %}
+      <p style="margin:14px 0 0">Объединено с обращением <a href="{% url 'appeal' appeal.duplicate_of.number %}"><strong>{{ appeal.duplicate_of.number }}</strong></a>: новости приходят по нему.</p>
+      {% endif %}
+    </div>
+
+    {% if appeal.decision %}
+    <div class="card">
+      <h2>Решение и результат</h2>
+      <div class="outcome {% if appeal.decision == 'rejected' %}rejected{% elif appeal.result %}done{% endif %}">
+        <p><strong>{{ appeal.get_decision_display }}</strong> <span class="muted small">· {{ appeal.decided_at|day }}</span></p>
+        <p class="quote" style="font-size:15px">{{ appeal.decision_reason }}</p>
+        {% if appeal.alternative %}<p style="margin-top:10px"><strong>Что сделаем вместо этого.</strong> {{ appeal.alternative }}</p>{% endif %}
+        {% if appeal.next_actions %}<p style="margin-top:10px"><strong>Дальнейшие действия.</strong> {{ appeal.next_actions }}</p>{% endif %}
+        {% if appeal.planned_date and appeal.decision == 'accepted' %}<p><strong>Плановая дата.</strong> {{ appeal.planned_date|day }}</p>{% endif %}
+        {% if appeal.result and appeal.result != appeal.decision_reason %}<p style="margin-top:10px"><strong>Что сделано.</strong> {{ appeal.result }}</p>{% endif %}
+        {% if appeal.author_confirmed %}<p class="small" style="margin:8px 0 0">✓ Автор подтвердил, что вопрос решён.</p>{% endif %}
+        {% if appeal.reopened_count %}<p class="small muted" style="margin:4px 0 0">Возвращалось в работу: {{ appeal.reopened_count }} раз.</p>{% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if mode == 'colleague' %}
+    <div class="card flat">
+      <p class="secondary" style="margin:0">Вы видите это обращение, потому что автор разрешил показывать его коллегам. Переписка и внутренние комментарии доступны только участникам рассмотрения.</p>
+    </div>
+    {% else %}
+    <div class="card">
+      <h2>История</h2>
+      <ul class="timeline">
+        {% for row in events %}{% with e=row.e %}
+        <li class="kind-{{ e.kind }} {% if e.visibility == 'internal' %}internal{% endif %}">
+          <div class="body">
+            <div class="when">{{ e.created_at|dt }} · {{ row.who }}{% if row.role %} <span class="muted">({{ row.role|lower }})</span>{% endif %}</div>
+            <div class="what">{{ row.label }}
+              {% if e.visibility == 'internal' %}<span class="tag">не видно автору</span>{% endif %}
+              {% if e.meta.leadership %}<span class="tag lead">ответ руководства</span>{% endif %}
+              {% if e.meta.manual %}<span class="tag">вручную</span>{% endif %}
+            </div>
+            {% if e.text %}<div class="text">{{ e.text }}</div>{% endif %}
+            {% if e.meta.planned_to %}<div class="small muted">Плановая дата: {{ e.meta.planned_from|default:"—" }} → {{ e.meta.planned_to }}</div>{% endif %}
+          </div>
+        </li>
+        {% endwith %}{% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+  </div>
+
+  <aside class="stack">
+    {% if actions %}
+    <div class="card">
+      <h2>Действия</h2>
+
+      {% if 'answer' in actions %}
+      <form method="post" action="{% url 'action' appeal.number 'answer' %}" class="field">{% csrf_token %}
+        <label for="answer-text">Ответ на вопрос</label>
+        <textarea id="answer-text" name="text" required></textarea>
+        <button class="btn primary block" style="margin-top:8px">Ответить</button>
+      </form>
+      {% endif %}
+
+      {% if 'confirm' in actions %}
+      <form method="post" action="{% url 'action' appeal.number 'confirm' %}" style="margin-bottom:8px">{% csrf_token %}
+        <button class="btn good block">✓ Подтверждаю: вопрос решён</button>
+      </form>
+      {% endif %}
+      {% if 'reopen' in actions %}
+      <details class="action">
+        <summary>Не решено — вернуть в работу</summary>
+        <form method="post" action="{% url 'action' appeal.number 'reopen' %}">{% csrf_token %}
+          <label for="reopen-text">Что осталось нерешённым</label>
+          <textarea id="reopen-text" name="text" required minlength="10"></textarea>
+          <button class="btn block" style="margin-top:8px">Вернуть в работу</button>
+        </form>
+      </details>
+      {% endif %}
+
+      {% if 'support' in actions and mode == 'colleague' %}
+      <form method="post" action="{% url 'action' appeal.number 'support' %}">{% csrf_token %}
+        <button class="btn primary block">У меня тоже</button>
+        <p class="hint">Ответственный увидит, что тема повторяется, а вы получите уведомление о решении.</p>
+      </form>
+      {% endif %}
+
+      {% if 'take' in actions %}
+      <form method="post" action="{% url 'action' appeal.number 'take' %}" style="margin-bottom:8px">{% csrf_token %}
+        <button class="btn primary block">Взять на рассмотрение</button>
+      </form>
+      {% endif %}
+      {% if 'start' in actions %}
+      <form method="post" action="{% url 'action' appeal.number 'start' %}" style="margin-bottom:8px">{% csrf_token %}
+        <button class="btn primary block">Начать реализацию</button>
+      </form>
+      {% endif %}
+
+      {% if 'decide' in actions %}
+      <details class="action primary" {% if appeal.status == 'review' %}open{% endif %}>
+        <summary>Принять решение</summary>
+        <form method="post" action="{% url 'action' appeal.number 'decide' %}">{% csrf_token %}
+          <div class="field choice">
+            <label><input type="radio" name="decision" value="accepted" id="dec-accepted" required><span>Принять</span></label>
+            <label><input type="radio" name="decision" value="rejected" id="dec-rejected"><span>Отклонить</span></label>
+            <label><input type="radio" name="decision" value="already_done" id="dec-done"><span>Уже сделано</span></label>
+          </div>
+          <div class="field">
+            <label for="reason">Обоснование <span class="muted" style="font-weight:400">— обязательно, автор его увидит</span></label>
+            <textarea id="reason" name="reason" required minlength="10"></textarea>
+          </div>
+          <div data-show-when="#dec-accepted" class="hidden">
+            <div class="field"><label for="next-actions">Что будет сделано и кем</label><textarea id="next-actions" name="next_actions" rows="2"></textarea></div>
+            <div class="field"><label for="planned">Плановая дата</label><input id="planned" type="date" name="planned_date" min="{{ today_iso }}" value="{{ default_planned }}">
+              <div class="hint">После этой даты обращение считается просроченным и уйдёт руководителю.</div></div>
+          </div>
+          <div data-show-when="#dec-rejected" class="hidden field">
+            <label for="alternative">Что сделаем вместо этого <span class="muted" style="font-weight:400">— если есть</span></label>
+            <textarea id="alternative" name="alternative" rows="2"></textarea>
+          </div>
+          <button class="btn primary block">Зафиксировать решение</button>
+        </form>
+      </details>
+      {% endif %}
+
+      {% if 'close_praise' in actions %}
+      <details class="action primary" open>
+        <summary>Передать отзыв и закрыть</summary>
+        <form method="post" action="{% url 'action' appeal.number 'close_praise' %}">{% csrf_token %}
+          <label for="praise-text">Кому и как передан отзыв</label>
+          <textarea id="praise-text" name="text" required minlength="10"></textarea>
+          <button class="btn primary block" style="margin-top:8px">Закрыть с благодарностью</button>
+        </form>
+      </details>
+      {% endif %}
+
+      {% if 'implement' in actions %}
+      <details class="action primary">
+        <summary>Отметить как реализованное</summary>
+        <form method="post" action="{% url 'action' appeal.number 'implement' %}">{% csrf_token %}
+          <label for="result-text">Что именно сделано</label>
+          <textarea id="result-text" name="text" required minlength="10"></textarea>
+          <p class="hint">Автор получит просьбу подтвердить, что вопрос решён.</p>
+          <button class="btn primary block">Реализовано</button>
+        </form>
+      </details>
+      {% endif %}
+
+      {% if 'progress' in actions %}
+      <details class="action">
+        <summary>Сообщить о ходе работ</summary>
+        <form method="post" action="{% url 'action' appeal.number 'progress' %}">{% csrf_token %}
+          <div class="field"><label for="progress-text">Что сделано и что дальше</label><textarea id="progress-text" name="text" required></textarea></div>
+          <div class="field"><label for="progress-date">Новая плановая дата <span class="muted" style="font-weight:400">— если сдвигается</span></label>
+            <input id="progress-date" type="date" name="planned_date" min="{{ today_iso }}"></div>
+          <button class="btn block">Отправить автору</button>
+        </form>
+      </details>
+      {% endif %}
+
+      {% if 'ask' in actions %}
+      <details class="action">
+        <summary>Задать вопрос автору</summary>
+        <form method="post" action="{% url 'action' appeal.number 'ask' %}">{% csrf_token %}
+          <textarea name="text" required aria-label="Вопрос автору"></textarea>
+          <p class="hint">Срок встанет на паузу, пока автор не ответит.</p>
+          <button class="btn block">Спросить</button>
+        </form>
+      </details>
+      {% endif %}
+
+      {% if 'message' in actions %}
+      <details class="action">
+        <summary>{% if mode == 'author' %}Дополнить обращение{% else %}Написать автору{% endif %}</summary>
+        <form method="post" enctype="multipart/form-data" action="{% url 'action' appeal.number 'message' %}">{% csrf_token %}
+          <textarea name="text" required aria-label="Сообщение"></textarea>
+          <input type="file" name="files" multiple style="margin-top:8px" aria-label="Файлы">
+          <button class="btn block" style="margin-top:8px">Отправить</button>
+        </form>
+      </details>
+      {% endif %}
+
+      {% if 'note' in actions %}
+      <details class="action">
+        <summary>Внутренний комментарий</summary>
+        <form method="post" action="{% url 'action' appeal.number 'note' %}">{% csrf_token %}
+          <textarea name="text" required aria-label="Внутренний комментарий"></textarea>
+          <p class="hint">Автор его не увидит.</p>
+          <button class="btn block">Добавить</button>
+        </form>
+      </details>
+      {% endif %}
+
+      {% if 'extend' in actions %}
+      <details class="action">
+        <summary>Продлить срок решения</summary>
+        <form method="post" action="{% url 'action' appeal.number 'extend' %}">{% csrf_token %}
+          <div class="field"><label for="extend-days">На сколько рабочих дней</label><input id="extend-days" type="number" name="days" min="1" max="10" value="3" required></div>
+          <div class="field"><label for="extend-text">Причина</label><textarea id="extend-text" name="text" rows="2" required minlength="10"></textarea></div>
+          <p class="hint">Продлить можно один раз. Автор получит уведомление с новой датой.</p>
+          <button class="btn block">Продлить</button>
+        </form>
+      </details>
+      {% endif %}
+
+      {% if 'not_mine' in actions %}
+      <details class="action">
+        <summary>Не моё</summary>
+        <form method="post" action="{% url 'action' appeal.number 'not_mine' %}">{% csrf_token %}
+          <label for="notmine-text">Почему и кому лучше передать</label>
+          <textarea id="notmine-text" name="text" rows="2" required minlength="10"></textarea>
+          <p class="hint">Правила сработают заново без вас. Для автора ничего не закрывается.</p>
+          <button class="btn block">Вернуть в маршрутизацию</button>
+        </form>
+      </details>
+      {% endif %}
+
+      {% if 'reassign' in actions and candidates %}
+      <details class="action">
+        <summary>Переназначить</summary>
+        <form method="post" action="{% url 'action' appeal.number 'reassign' %}">{% csrf_token %}
+          <div class="field"><label for="target">Новый ответственный</label>
+            <select id="target" name="target" required><option value="">— выберите —</option>
+              {% for p in candidates %}<option value="{{ p.pk }}">{{ p.full_name }} — {{ p.position }}{% if p.absent %} ({{ p.absence_note|default:"отсутствует" }}){% endif %}</option>{% endfor %}
+            </select></div>
+          <div class="field"><label for="reassign-text">Причина</label><textarea id="reassign-text" name="text" rows="2" required minlength="10"></textarea></div>
+          <button class="btn block">Переназначить</button>
+        </form>
+      </details>
+      {% endif %}
+
+      {% if 'duplicate' in actions %}
+      <details class="action" {% if related %}open{% endif %}>
+        <summary>Объединить с другим обращением</summary>
+        <form method="post" action="{% url 'action' appeal.number 'duplicate' %}">{% csrf_token %}
+          {% if related %}
+          <p class="small secondary">Похожие по тексту:</p>
+          {% for r in related %}
+          <label class="check small" style="margin-bottom:6px"><input type="radio" name="main" value="{{ r.number }}" required>
+            <span><a href="{% url 'appeal' r.number %}" target="_blank" rel="noopener"><strong>{{ r.number }}</strong></a> · {{ r.get_status_display }}<br>{{ r.title }}</span></label>
+          {% endfor %}
+          {% else %}
+          <div class="field"><label for="main">Номер основного обращения</label><input id="main" type="text" name="main" placeholder="A-007" required></div>
+          {% endif %}
+          <div class="field"><label for="dup-text">Комментарий <span class="muted" style="font-weight:400">— необязательно</span></label><input id="dup-text" type="text" name="text"></div>
+          <p class="hint">Автор будет получать новости по основному обращению, а его голос засчитается как повтор темы.</p>
+          <button class="btn block">Объединить</button>
+        </form>
+      </details>
+      {% endif %}
+
+      {% if 'support' in actions and mode != 'colleague' %}
+      <form method="post" action="{% url 'action' appeal.number 'support' %}" style="margin-top:10px">{% csrf_token %}
+        <button class="btn small">У меня тоже — отметить как повторяющуюся тему</button>
+      </form>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="card">
+      <h2>Сведения</h2>
+      <dl class="facts">
+        <dt>Автор</dt>
+        <dd>{% if sees_author %}{{ appeal.author.full_name }}<br><span class="muted small">{{ appeal.author.position }}{% if appeal.author.department %} · {{ appeal.author.department.name }}{% endif %}</span>
+          {% else %}<span class="muted">скрыт: обращение конфиденциальное</span>{% endif %}</dd>
+        {% if appeal.registered_by and mode != 'colleague' %}<dt>Зарегистрировал</dt><dd>{{ appeal.registered_by.short_name }} · {{ appeal.get_source_display|lower }}</dd>{% endif %}
+        <dt>Ответственный</dt>
+        <dd>{% if appeal.assignee %}{{ appeal.assignee.full_name }}<br><span class="muted small">{{ appeal.assignee.position }}{% if appeal.assignee.department %} · {{ appeal.assignee.department.name }}{% endif %}</span>{% else %}—{% endif %}</dd>
+        {% if internal and appeal.routing_note %}<dt>Почему он</dt><dd class="small">{{ appeal.routing_note }}</dd>{% endif %}
+        {% if internal and appeal.escalated_to and appeal.escalation_level %}<dt>На контроле</dt><dd>{{ appeal.escalated_to.short_name }}{% if appeal.escalation_level >= 2 %} и руководство компании{% endif %}</dd>{% endif %}
+        {% if internal and appeal.about_person %}<dt>Касается</dt><dd>{{ appeal.about_person.short_name }} <span class="muted small">— не видит обращение</span></dd>{% endif %}
+        <dt>Создано</dt><dd>{{ appeal.created_at|dt }}</dd>
+        {% if mode != 'colleague' %}
+        <dt>Первый ответ</dt><dd>{% if appeal.first_response_at %}{{ appeal.first_response_at|dt }}{% else %}срок до {{ appeal.first_response_due|day }}{% endif %}</dd>
+        {% if not appeal.decided_at and appeal.decision_due %}<dt>Срок решения</dt><dd>{{ appeal.decision_due|day }}{% if appeal.deadline_extended %} <span class="muted small">(продлён)</span>{% endif %}</dd>{% endif %}
+        {% endif %}
+        <dt>Приоритет</dt><dd>{{ appeal.get_priority_display }}</dd>
+        <dt>Видимость</dt><dd>{% if appeal.is_published %}видно коллегам{% else %}только участникам{% endif %}</dd>
+        {% if support_count or duplicates %}<dt>Повторы</dt>
+        <dd>{% if support_count %}«у меня тоже»: {{ support_count }}{% endif %}
+          {% for d in duplicates %}{% if forloop.first and support_count %}<br>{% endif %}{% if internal %}<a href="{% url 'appeal' d.number %}">{{ d.number }}</a>{% else %}{{ d.number }}{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</dd>{% endif %}
+      </dl>
+    </div>
+  </aside>
+</div>
+{% endwith %}
+{% endblock %}
