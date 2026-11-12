@@ -378,7 +378,7 @@ Principles:
 
 How it works:
 
-- **Account linking** **[MVP]**. The employee opens a link like `t.me/<bot>?start=<one-time code>` from their profile in the system (**[next]** also from Bitrix24). The bot ties their Telegram ID to their employee record. An unlinked account can't send or see anything, so outsiders can't get in.
+- **Account linking** **[MVP]**. The employee opens a link like `t.me/<bot>?start=<one-time code>` from their profile in the system: on a phone with a button, from a computer by scanning a QR code with the phone's camera (**[next]** also from Bitrix24). Our server draws the QR code, so the one-time code never goes to an outside service. Once the bot confirms the link, the profile page updates by itself. The bot ties their Telegram ID to their employee record. An unlinked account can't send or see anything, so outsiders can't get in.
 - **Notifications** **[MVP]**: the request number, the new status and an "Open" button. The button appears when the system has a public address; on a local address the link goes in the message text. We don't send request text or names to Telegram, because Telegram's servers are outside Kazakhstan.
 - **Submission through a Mini App** **[next]**. A button in the bot opens our own web form inside Telegram. The form data goes from the phone straight to our server, not through the bot chat. The user is identified by `initData`, whose signature the server checks against the bot token.
 - **Action buttons** **[next]**: "Confirm" and "Not solved" after implementation, and "Reply" to a clarifying question (opens the request in the Mini App). In the MVP a notification has only the "Open" button.
@@ -461,7 +461,7 @@ A lawyer should check the legal conclusions before rollout.
 
 ## 9. Rollout: what's needed besides the software
 
-The research shows software alone doesn't create a feedback culture. The pitch should cover the organizational side too.
+The research shows software alone doesn't create a feedback culture. The pitch should cover the organizational side too. More on keeping employees motivated, the review rhythm, and the metrics that show the process isn't fading is in the [user stories](user-stories.en.md).
 
 1. **A one-page regulation:** deadlines, routing rules (who owns which categories), who the coordinator is, when reviews happen, confidentiality rules.
 2. **Launch from the top:** a short message from the owner to staff, like his hackathon video. He handles the first requests personally.
@@ -518,7 +518,7 @@ The first column lists what the working MVP implements. Several things first pla
 | Rule-based routing: role by type and category, the author's department head and business-area head, the area rule, the default rule, backup chain, "Not mine", manual reassignment with a reason | Changing the category or priority of a submitted request, with the deadlines recalculated | Load balancing within a group of owners |
 | Rules edited in the admin panel; the "who will get it" check | Splitting a request and co-assignees; tone moderation by the coordinator | AI suggestions for category and duplicates, email intake |
 | Category suggestion by keywords; similar requests while typing and "me too" | A reminder and automatic closing when the author doesn't answer a question; a reminder to report progress at least every 10 working days | Anonymous mode with a code |
-| Statuses, thread with the author, internal comments; a decision with reasons, next actions and a planned date; "what we'll do instead" for a rejection | Answer rating; reopen rates by category in analytics | Client feedback, NPS, surveys |
+| Statuses, thread with the author, internal comments; a decision with reasons, next actions and a planned date; "what we'll do instead" for a rejection | Answer rating; reopen rates by category and the share of authors who submit a second time in analytics | Client feedback, NPS, surveys |
 | The author confirms the result or sends the request back to work; an unconfirmed result closes automatically after 7 days | "Review" mode for meetings, answer templates | Grouping themes with AI |
 | Two deadlines per category in working days by the calendar, priority, pause, one extension | Daily digest of notifications; weekly digest for leadership | Context from 1C |
 | Escalation by a background check: a reminder, then the assignee's manager, then leadership; every step is in the request history; a demo clock | Saving drafts | Kazakh interface |
@@ -533,7 +533,7 @@ The first column lists what the working MVP implements. Several things first pla
 | Telegram: account linking and notifications; covered by automated tests and checked with a real bot (section 7.1) | | |
 | Admin panel for reference data: categories and their deadlines, rules, roles, the directory, the calendar, escalation thresholds | | |
 | Demo data: the dataset's 20 requests with priorities plus the team's own synthetic ones (from A-021), the rules from section 3.1, an employee "on holiday", a few similar requests, dates generated relative to the day of loading, requests at every escalation level | | |
-| A role switcher instead of login, for the demo; 80 automated tests, and the core's tests run with every integration switched off | | |
+| A role switcher instead of login, for the demo; 83 automated tests, and the core's tests run with every integration switched off | | |
 
 **Needs separate technical work** (spec §3.6):
 - embedding in Bitrix24 and syncing the org structure;

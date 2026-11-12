@@ -184,7 +184,7 @@ The pages are built for phones, with one stylesheet and no separate mobile versi
 | Telegram | the Bot API through Python's standard library | No extra dependencies; the bot polls for updates itself, so it does not need a public address |
 | Running | gunicorn and WhiteNoise; a Dockerfile is included | One process, one data volume |
 
-There are four dependencies: Django, WhiteNoise, gunicorn, tzdata.
+There are five dependencies: Django, WhiteNoise, gunicorn, tzdata, and segno, which draws the QR code for linking Telegram on our server, with no outside service.
 
 **What we considered and why we did not choose it**
 
@@ -221,7 +221,7 @@ The full "who sees what" and "who can do what" tables are in the [solution desig
 
 ## 8. Tests
 
-80 automated tests run with `python manage.py test`. The core's tests run with every integration switched off, which checks the architecture's main promise.
+83 automated tests run with `python manage.py test`. The core's tests run with every integration switched off, which checks the architecture's main promise.
 
 | What is checked | Examples |
 |---|---|

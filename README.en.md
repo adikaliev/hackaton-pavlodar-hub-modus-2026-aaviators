@@ -10,6 +10,55 @@ An entry for the ГК «Модус Трейд» track (Pavlodar IT Hub hackathon
 
 The interface is in Russian, because the jury and the users are Russian-speaking.
 
+## For the jury
+
+### The solution in brief
+
+- **The problem.** Questions and ideas reach the company chaotically: by email, as a remark at a meeting, in conversation. The owner has no overall picture, and an employee assumes their issue is being handled when it has been forgotten. In his video, the owner fears that over time people will simply stop speaking up.
+- **The solution.** One module for requests: problems, ideas and thanks. Rules pick the assignee, every request has a deadline, and if nobody answers, the request moves up to the manager and then to leadership by itself. Every answer comes with reasons, and the author confirms the result.
+- **The value.** Employees see what stage their issue is at and how it ended. Department heads see their department's queue and overdue items. The owner sees the whole picture on one screen: which issues are open and who is holding what.
+- **The format.** A working MVP: it starts with one command and uses synthetic data. Telegram is connected for real; Bitrix24 is a simulator, because we have no access to the client's portal.
+
+### Documents
+
+| Document | What it covers |
+|---|---|
+| [Solution design](docs/solution-design.en.md) | the process for each role, routing rules, statuses and deadlines, escalation, visibility, integrations, rollout, development stages, assumptions |
+| [Technical concept](docs/technical-concept.en.md) | modules, data model, screen map, technology choices, security, the path to production |
+| [Value proposition](docs/value-proposition.en.md) | how the solution differs from competitors, answers to objections, numbers with sources |
+| [User stories](docs/user-stories.en.md) | stories for each role; how employees stay motivated and what keeps the process from fading: rhythm, health metrics, the first 90 days |
+| [Spec](docs/task-spec.md), [dataset](docs/dataset.md) | the organizers' materials (in Russian) |
+| [Changelog](CHANGELOG.en.md) | what changed and when |
+
+The main version of each document is in Russian; the English version has the `.en.md` suffix. When one changes, the other is updated too.
+
+### Where the spec's requirements are answered
+
+The [spec](docs/task-spec.md) (in Russian) asks every solution to answer three questions (§6):
+
+1. **What business problem does the product solve, and what value does it create?** In brief above; in detail in the [value proposition](docs/value-proposition.en.md).
+2. **How does the solution work in practice?** The [request lifecycle](docs/solution-design.en.md#3-request-lifecycle) and [journeys by role](docs/solution-design.en.md#4-journeys-by-role) in the solution design, the [user stories](docs/user-stories.en.md) and the [demo](#how-to-view-the-demo).
+3. **How can the product be developed and integrated into the company's systems?** [Development stages](docs/solution-design.en.md#11-mvp-scope), [integrations with Bitrix24, 1C and Telegram](docs/solution-design.en.md#7-integrations), [the path to production](docs/technical-concept.en.md#9-mvp-limitations-and-the-path-to-production).
+
+| What the spec requires | Where to look |
+|---|---|
+| Product concept, the problem solved, value for users (§4.1) | [The solution in brief](#the-solution-in-brief), [value proposition](docs/value-proposition.en.md), [principles](docs/solution-design.en.md#1-principles) |
+| Target users and key scenarios (§4.1) | [Participants](docs/solution-design.en.md#2-participants), [journeys by role](docs/solution-design.en.md#4-journeys-by-role), [user stories](docs/user-stories.en.md) |
+| Interface prototype: main screens and how they connect (§4.1, §3.2) | The working app ([running it](#running-it)), [screen map](docs/technical-concept.en.md#4-screens-and-transitions), [screenshots](docs/screenshots/) |
+| Technical concept: architecture, technologies, data, security, integrations (§4.1, §3.3) | [Technical concept](docs/technical-concept.en.md) |
+| Development plan: the MVP and later stages (§4.1, §3.6) | [MVP scope by stage](docs/solution-design.en.md#11-mvp-scope), [the path to production](docs/technical-concept.en.md#9-mvp-limitations-and-the-path-to-production) |
+| Demonstration and an explanation of limitations (§4.1) | [How to view the demo](#how-to-view-the-demo), [known limitations](#known-limitations) |
+| Code, instructions to run and demonstrate it (§4.2) | This repository: [running it](#running-it), [how to view the demo](#how-to-view-the-demo), [repository layout](#repository-layout) |
+| What is implemented, what simulates external systems, what is planned; known limitations (§4.2) | [What is implemented, what is simulated, what is planned](#what-is-implemented-what-is-simulated-what-is-planned), [known limitations](#known-limitations), the "Integrations" page in the app |
+| Test data and end-to-end scenarios (§4.2) | [Test data](#test-data), the organizers' six scenarios in [How to view the demo](#how-to-view-the-demo) |
+| How a request reaches its assignee, how status and outcome are recorded, how the author follows progress, why requests don't get lost, how repeats are detected (§2.5) | [Request lifecycle](docs/solution-design.en.md#3-request-lifecycle): routing, statuses, deadlines, escalation, recurring problems |
+| Who creates, views, edits and handles requests; anonymity (§2.6) | [Visibility and access](docs/solution-design.en.md#5-visibility-and-access), [access in the technical concept](docs/technical-concept.en.md#6-access) |
+| Value metrics (§2.7) | The leadership dashboard (screenshot above), [what leadership sees](docs/solution-design.en.md#45-leadership) |
+| Limitations and assumptions (§3.1, §5) | [Assumptions and open questions](docs/solution-design.en.md#12-assumptions-and-open-questions), [known limitations](#known-limitations) |
+| How to check usefulness (§3.1) | [How to check usefulness](docs/technical-concept.en.md#10-how-to-check-usefulness), [process health metrics](docs/user-stories.en.md#44-process-health-metrics) |
+| Integrations: purpose, data and its direction, method, what to clarify (§3.4) | [Integrations](docs/solution-design.en.md#7-integrations) |
+| Data and security (§3.5) | [Data, security, legal](docs/solution-design.en.md#8-data-security-legal), [data protection](docs/technical-concept.en.md#7-data-protection) |
+
 ## Running it
 
 You need Python 3.12 or newer. No other services are required: the database is a SQLite file.
@@ -31,7 +80,7 @@ Individual commands:
 | `python manage.py seed_demo` | rebuilds the demo data from the files in `data/` |
 | `python manage.py runserver` | starts the server |
 | `python manage.py worker` | escalation and notification delivery as a separate process (in the demo a thread inside the server does this) |
-| `python manage.py test` | 80 automated tests |
+| `python manage.py test` | 83 automated tests |
 
 With Docker: `docker compose up --build`, then <http://localhost:8000>. The image is verified: all tests pass inside the container, and background work runs inside the web process.
 
@@ -130,7 +179,7 @@ The loader replays the histories through the same functions the interface uses. 
 1. Create a bot with [@BotFather](https://t.me/BotFather).
 2. Copy `.env.example` to `.env` and fill in `TELEGRAM_BOT_TOKEN`, `TELEGRAM_BOT_USERNAME` and the system's public address in `PUBLIC_BASE_URL`.
 3. Restart the server. Log in as the administrator (Бекмуханов Р.) and switch the integration on at the "Интеграции" page.
-4. Under any role, open "Профиль" → "Привязать Telegram".
+4. Under any role, open "Профиль" → "Привязать Telegram". On a phone, tap the button; if the page is open on a computer, scan the QR code with the phone's camera. Press "Start" in the bot, and the profile page shows by itself that the account is linked.
 
 Only the request number, the status and a link go to Telegram. Request text and names are not sent.
 
@@ -148,15 +197,3 @@ data/                   demo data
 docs/                   documents for the jury
 tools/                  helper scripts
 ```
-
-## Documents
-
-| Document | What it covers |
-|---|---|
-| [Solution design](docs/solution-design.en.md) | the process for each role, routing rules, statuses and deadlines, escalation, visibility, integrations, rollout, development stages, assumptions |
-| [Technical concept](docs/technical-concept.en.md) | modules, data model, screen map, technology choices, security, the path to production |
-| [Value proposition](docs/value-proposition.en.md) | how the solution differs from competitors, answers to objections, numbers with sources |
-| [Spec](docs/task-spec.md), [dataset](docs/dataset.md) | the organizers' materials (in Russian) |
-| [Changelog](CHANGELOG.en.md) | what changed and when |
-
-The main version of each document is in Russian; the English version has the `.en.md` suffix. When one changes, the other is updated too.
