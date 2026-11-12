@@ -61,7 +61,7 @@ The [spec](docs/task-spec.md) (in Russian) asks every solution to answer three q
 
 ## Running it
 
-You need Python 3.12 or newer. No other services are required: the database is a SQLite file.
+You need Python 3.12 or newer. No other services are required: the database is a SQLite file. You don't need a `.env` file either: everything works without it except Telegram, which needs your own bot's token (see [Telegram](#telegram)).
 
 ```
 python -m venv .venv
