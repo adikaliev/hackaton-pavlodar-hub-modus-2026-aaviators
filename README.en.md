@@ -94,6 +94,8 @@ The demo runs online: <https://hackaton-pavlodar-hub-modus-2026.onrender.com/>. 
 - the demo clock and the "Сбросить данные" button are shared by all visitors;
 - when the server restarts, the data returns to its initial state.
 
+**Telegram is connected for real in the online demo.** Open "Профиль" → "Привязать Telegram" (on a computer, scan the QR code with your phone), press "Start" in the bot, and notifications about your requests arrive in Telegram. After a server restart, link the account again.
+
 There is no password login: pick a scenario on the home page, and the system opens as the right employee. You can switch roles in the top right corner. All data is synthetic and all names are invented.
 
 The six demo scenarios from the organizers' dataset ([docs/dataset.md](docs/dataset.md), section 4):
@@ -183,6 +185,8 @@ The demo database is always built from the files in `data/` and is never committ
 The loader replays the histories through the same functions the interface uses. So the deadlines, escalations and dashboard numbers are real and current on the day the data is loaded: on 16 November the demo looks the same as today.
 
 ## Telegram
+
+In the [online demo](https://hackaton-pavlodar-hub-modus-2026.onrender.com/) the bot is already connected: only step 4 is needed. To connect Telegram in your own copy:
 
 1. Create a bot with [@BotFather](https://t.me/BotFather).
 2. Copy `.env.example` to `.env` and fill in `TELEGRAM_BOT_TOKEN`, `TELEGRAM_BOT_USERNAME` and the system's public address in `PUBLIC_BASE_URL`.
