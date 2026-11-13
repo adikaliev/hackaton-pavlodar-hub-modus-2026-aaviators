@@ -30,6 +30,7 @@ The interface is in Russian, because the jury and the users are Russian-speaking
 | [Value proposition](docs/value-proposition.en.md) | how the solution differs from competitors, answers to objections, numbers with sources |
 | [User stories](docs/user-stories.en.md) | stories for each role; how employees stay motivated and what keeps the process from fading: rhythm, health metrics, the first 90 days |
 | [Spec](docs/task-spec.md), [dataset](docs/dataset.md) | the organizers' materials (in Russian) |
+| [Working notes](docs/internal/) | task analysis, the spec coverage check, research on existing tools and cases |
 | [Changelog](CHANGELOG.en.md) | what changed and when |
 
 The main version of each document is in Russian; the English version has the `.en.md` suffix. When one changes, the other is updated too.

@@ -10,8 +10,8 @@
 docs/source/
 
 # --- Team-internal material (kept on disk, synced by OneDrive, not published) --
-# Working notes: task analysis, spec coverage check, video transcript, research.
-docs/internal/
+# Transcript of the sponsor's video message (the video itself is not published either).
+docs/internal/sponsor-video-transcript.md
 # Instructions for coding agents.
 AGENTS.md
 CLAUDE.md

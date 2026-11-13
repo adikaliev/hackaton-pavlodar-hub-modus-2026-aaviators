@@ -7,6 +7,7 @@ All notable changes to this project are documented here, in [Keep a Changelog](h
 ## [Unreleased]
 
 ### Added
+- 2026-11-13: The team's working notes in `docs/internal/` are now published: task analysis, the spec coverage check, research on existing tools. The transcript of the sponsor's video stays with the team.
 - 2026-11-13: The demo is online on Render's free hosting: <https://hackaton-pavlodar-hub-modus-2026.onrender.com/>. The link is at the top of the README and in "How to view the demo", which also explains how the online version differs from a local one. The Telegram bot is connected and works in the online demo.
 - 2026-11-12: Linking Telegram by QR code: the profile shows a QR code with the same one-time link next to the button, so an account can be linked from a page open on a computer. Our server draws the QR code (new dependency `segno`), so the code never goes to an outside service. The profile page notices the link and updates by itself. 3 new tests, 83 in total.
 - 2026-11-12: User stories (`docs/user-stories.en.md`): 42 stories by role with stage tags; how employees stay motivated (the author's journey, recognition instead of money and quotas, motivating the people who answer) and what keeps the process from fading (what the system enforces, the review rhythm, process health metrics, the first 90 days). The share of authors who submit a second time is added to the next-stage plan (`docs/solution-design.en.md`, section 11).
