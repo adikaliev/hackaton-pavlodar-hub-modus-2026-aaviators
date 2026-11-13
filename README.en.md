@@ -4,6 +4,8 @@
 
 An entry for the ГК «Модус Трейд» track (Pavlodar IT Hub hackathon, 2026). A working MVP.
 
+**Live demo: <https://hackaton-pavlodar-hub-modus-2026.onrender.com/>**. It opens in a browser; nothing to install. See [How to view the demo](#how-to-view-the-demo).
+
 > **A guaranteed answer, not a suggestion box.** Every request gets a number, an owner and a deadline at once. If nobody answers, the request moves up on its own: to the department head, then to company leadership. The author always sees what stage their question is at.
 
 ![Leadership dashboard](docs/screenshots/06-dashboard.png)
@@ -17,7 +19,7 @@ The interface is in Russian, because the jury and the users are Russian-speaking
 - **The problem.** Questions and ideas reach the company chaotically: by email, as a remark at a meeting, in conversation. The owner has no overall picture, and an employee assumes their issue is being handled when it has been forgotten. In his video, the owner fears that over time people will simply stop speaking up.
 - **The solution.** One module for requests: problems, ideas and thanks. Rules pick the assignee, every request has a deadline, and if nobody answers, the request moves up to the manager and then to leadership by itself. Every answer comes with reasons, and the author confirms the result.
 - **The value.** Employees see what stage their issue is at and how it ended. Department heads see their department's queue and overdue items. The owner sees the whole picture on one screen: which issues are open and who is holding what.
-- **The format.** A working MVP: it starts with one command and uses synthetic data. Telegram is connected for real; Bitrix24 is a simulator, because we have no access to the client's portal.
+- **The format.** A working MVP: [online](https://hackaton-pavlodar-hub-modus-2026.onrender.com/), and it starts locally with one command; the data is synthetic. Telegram is connected for real; Bitrix24 is a simulator, because we have no access to the client's portal.
 
 ### Documents
 
@@ -44,7 +46,7 @@ The [spec](docs/task-spec.md) (in Russian) asks every solution to answer three q
 |---|---|
 | Product concept, the problem solved, value for users (§4.1) | [The solution in brief](#the-solution-in-brief), [value proposition](docs/value-proposition.en.md), [principles](docs/solution-design.en.md#1-principles) |
 | Target users and key scenarios (§4.1) | [Participants](docs/solution-design.en.md#2-participants), [journeys by role](docs/solution-design.en.md#4-journeys-by-role), [user stories](docs/user-stories.en.md) |
-| Interface prototype: main screens and how they connect (§4.1, §3.2) | The working app ([running it](#running-it)), [screen map](docs/technical-concept.en.md#4-screens-and-transitions), [screenshots](docs/screenshots/) |
+| Interface prototype: main screens and how they connect (§4.1, §3.2) | The working app ([online](https://hackaton-pavlodar-hub-modus-2026.onrender.com/), [running it](#running-it)), [screen map](docs/technical-concept.en.md#4-screens-and-transitions), [screenshots](docs/screenshots/) |
 | Technical concept: architecture, technologies, data, security, integrations (§4.1, §3.3) | [Technical concept](docs/technical-concept.en.md) |
 | Development plan: the MVP and later stages (§4.1, §3.6) | [MVP scope by stage](docs/solution-design.en.md#11-mvp-scope), [the path to production](docs/technical-concept.en.md#9-mvp-limitations-and-the-path-to-production) |
 | Demonstration and an explanation of limitations (§4.1) | [How to view the demo](#how-to-view-the-demo), [known limitations](#known-limitations) |
@@ -85,6 +87,12 @@ Individual commands:
 With Docker: `docker compose up --build`, then <http://localhost:8000>. The image is verified: all tests pass inside the container, and background work runs inside the web process.
 
 ## How to view the demo
+
+The demo runs online: <https://hackaton-pavlodar-hub-modus-2026.onrender.com/>. You can also run it yourself (see [Running it](#running-it)). The online version is on free hosting, so:
+
+- if nobody has opened the site for a while, the first load can take up to a minute;
+- the demo clock and the "Сбросить данные" button are shared by all visitors;
+- when the server restarts, the data returns to its initial state.
 
 There is no password login: pick a scenario on the home page, and the system opens as the right employee. You can switch roles in the top right corner. All data is synthetic and all names are invented.
 
